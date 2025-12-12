@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsUUID, ArrayMinSize } from 'class-validator';
 
 export class BulkDeleteUsersDto {
   @ApiProperty({
@@ -9,6 +10,8 @@ export class BulkDeleteUsersDto {
     description: 'Array of user UUIDs to delete',
     type: [String],
   })
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsUUID('4', { each: true })
   ids: string[];
 }
-
