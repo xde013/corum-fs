@@ -8,6 +8,7 @@ import {
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
+import helmet from '@fastify/helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -16,6 +17,9 @@ async function bootstrap() {
   );
 
   const configService = app.get(ConfigService);
+
+  // Enable security headers
+  await app.register(helmet);
 
   // Enable validation globally
   app.useGlobalPipes(
