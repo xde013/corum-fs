@@ -53,4 +53,31 @@ export class UsersService {
     const result = await this.userRepository.delete(id);
     return (result.affected ?? 0) > 0;
   }
+
+  async bulkRemove(
+    ids: string[],
+  ): Promise<{ deleted: number; failed: string[] }> {
+    if (!ids || ids.length === 0) {
+      return { deleted: 0, failed: [] };
+    }
+
+    const result = await this.userRepository.delete(ids);
+    const deletedCount = result.affected ?? 0;
+
+    // Calculate which IDs failed to delete
+    const failed: string[] = [];
+    if (deletedCount < ids.length) {
+      // Find which ones still exist
+      const remainingUsers = await this.userRepository.find({
+        where: ids.map((id) => ({ id })),
+        select: ['id'],
+      });
+      failed.push(...remainingUsers.map((user) => user.id));
+    }
+
+    return {
+      deleted: deletedCount,
+      failed,
+    };
+  }
 }

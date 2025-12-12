@@ -8,6 +8,7 @@ import {
   Delete,
   HttpStatus,
   NotFoundException,
+  HttpCode,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,6 +20,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { BulkDeleteUsersDto } from './dto/bulk-delete-users.dto';
 import { User } from './entities/user.entity';
 
 @ApiTags('users')
@@ -125,5 +127,43 @@ export class UsersController {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     return { message: `User with ID ${id} has been deleted` };
+  }
+
+  @Delete()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk delete users' })
+  @ApiBody({ type: BulkDeleteUsersDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Users have been bulk deleted.',
+    schema: {
+      type: 'object',
+      properties: {
+        deleted: {
+          type: 'number',
+          example: 5,
+          description: 'Number of users successfully deleted',
+        },
+        failed: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['550e8400-e29b-41d4-a716-446655440000'],
+          description: 'Array of user IDs that failed to delete',
+        },
+        message: {
+          type: 'string',
+          example: 'Successfully deleted 5 user(s)',
+        },
+      },
+    },
+  })
+  async bulkRemove(
+    @Body() bulkDeleteUsersDto: BulkDeleteUsersDto,
+  ): Promise<{ deleted: number; failed: string[]; message: string }> {
+    const result = await this.usersService.bulkRemove(bulkDeleteUsersDto.ids);
+    return {
+      ...result,
+      message: `Successfully deleted ${result.deleted} user(s)`,
+    };
   }
 }

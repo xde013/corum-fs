@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ClassSerializerInterceptor } from '@nestjs/common';
 import { AppModule } from './app.module';
 import {
   FastifyAdapter,
@@ -6,6 +7,7 @@ import {
 } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -14,6 +16,9 @@ async function bootstrap() {
   );
 
   const configService = app.get(ConfigService);
+
+  // Enable class-transformer serialization globally
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   // Swagger configuration
   const config = new DocumentBuilder()

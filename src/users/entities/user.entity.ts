@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import {
   Entity,
   Column,
@@ -37,11 +38,9 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @ApiProperty({
-    example: 'hashed_password',
-    description: 'The hashed password of the user',
-  })
+  @ApiHideProperty()
   @Column()
+  @Exclude()
   password: string;
 
   @ApiProperty({
