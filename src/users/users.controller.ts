@@ -51,7 +51,12 @@ export class UsersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a user by ID' })
-  @ApiParam({ name: 'id', description: 'User ID', type: Number })
+  @ApiParam({
+    name: 'id',
+    description: 'User UUID',
+    type: String,
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returns the user.',
@@ -62,7 +67,7 @@ export class UsersController {
     description: 'User not found.',
   })
   async findOne(@Param('id') id: string): Promise<User> {
-    const user = await this.usersService.findOne(+id);
+    const user = await this.usersService.findOne(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -71,7 +76,12 @@ export class UsersController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user' })
-  @ApiParam({ name: 'id', description: 'User ID', type: Number })
+  @ApiParam({
+    name: 'id',
+    description: 'User UUID',
+    type: String,
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -86,7 +96,7 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    const user = await this.usersService.update(+id, updateUserDto);
+    const user = await this.usersService.update(id, updateUserDto);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -95,7 +105,12 @@ export class UsersController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a user' })
-  @ApiParam({ name: 'id', description: 'User ID', type: Number })
+  @ApiParam({
+    name: 'id',
+    description: 'User UUID',
+    type: String,
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'The user has been successfully deleted.',
@@ -105,7 +120,7 @@ export class UsersController {
     description: 'User not found.',
   })
   async remove(@Param('id') id: string): Promise<{ message: string }> {
-    const deleted = await this.usersService.remove(+id);
+    const deleted = await this.usersService.remove(id);
     if (!deleted) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }

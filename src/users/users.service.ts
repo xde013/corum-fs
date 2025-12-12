@@ -24,7 +24,7 @@ export class UsersService {
     return await this.userRepository.find();
   }
 
-  async findOne(id: number): Promise<User | null> {
+  async findOne(id: string): Promise<User | null> {
     return await this.userRepository.findOne({ where: { id } });
   }
 
@@ -32,7 +32,7 @@ export class UsersService {
     return await this.userRepository.findOne({ where: { email } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User | null> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
     const user = await this.findOne(id);
     if (!user) {
       return null;
@@ -49,7 +49,7 @@ export class UsersService {
     return await this.findOne(id);
   }
 
-  async remove(id: number): Promise<boolean> {
+  async remove(id: string): Promise<boolean> {
     const result = await this.userRepository.delete(id);
     return (result.affected ?? 0) > 0;
   }
