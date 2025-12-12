@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
 @Entity('users')
@@ -57,6 +58,7 @@ export class User {
     description: 'The date the user was created',
   })
   @CreateDateColumn()
+  @Index('IDX_users_created_at')
   createdAt: Date;
 
   @ApiProperty({

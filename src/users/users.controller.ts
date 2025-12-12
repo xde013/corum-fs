@@ -9,6 +9,7 @@ import {
   HttpStatus,
   NotFoundException,
   HttpCode,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,11 +17,14 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { BulkDeleteUsersDto } from './dto/bulk-delete-users.dto';
+import { CursorPaginationDto } from './dto/cursor-pagination.dto';
+import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto';
 import { User } from './entities/user.entity';
 
 @ApiTags('users')
@@ -41,14 +45,71 @@ export class UsersController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all users' })
+  @ApiOperation({
+    summary: 'Get all users with cursor-based pagination',
+    description:
+      'Efficient pagination for large datasets. Use nextCursor from response for subsequent requests.',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    type: String,
+    description: 'Cursor (user ID) to start from. Omit for first page.',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of items to return (max 100)',
+    example: 10,
+  })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Returns all users.',
-    type: [User],
+    description: 'Returns cursor-paginated users.',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/User' },
+        },
+        meta: {
+          type: 'object',
+          properties: {
+            nextCursor: {
+              type: 'string',
+              nullable: true,
+              example: '550e8400-e29b-41d4-a716-446655440001',
+              description: 'Use this cursor for the next request',
+            },
+            hasMore: {
+              type: 'boolean',
+              example: true,
+              description: 'Whether more items are available',
+            },
+            count: {
+              type: 'number',
+              example: 10,
+              description: 'Number of items in this response',
+            },
+            limit: {
+              type: 'number',
+              example: 10,
+              description: 'Requested limit',
+            },
+          },
+        },
+      },
+    },
   })
-  async findAll(): Promise<User[]> {
-    return await this.usersService.findAll();
+  async findAll(
+    @Query() paginationDto: CursorPaginationDto,
+  ): Promise<CursorPaginatedResponseDto<User>> {
+    return await this.usersService.findAllCursorPaginated(
+      paginationDto.cursor,
+      paginationDto.limit,
+    );
   }
 
   @Get(':id')

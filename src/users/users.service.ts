@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto';
 import { User } from './entities/user.entity';
 import { USER_REPOSITORY } from './users.constants';
 
@@ -22,6 +23,50 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();
+  }
+
+  async findAllCursorPaginated(
+    cursor?: string,
+    limit: number = 10,
+  ): Promise<CursorPaginatedResponseDto<User>> {
+    // Check if there are more results
+    const take = limit + 1;
+
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .orderBy('user.createdAt', 'DESC')
+      .addOrderBy('user.id', 'DESC')
+      .take(take);
+
+    // If cursor is provided, fetch records after that cursor
+    if (cursor) {
+      const cursorUser = await this.userRepository.findOne({
+        where: { id: cursor },
+      });
+
+      if (cursorUser) {
+        // Use WHERE to handle ties in createdAt (rarely happens)
+        // maintain consistent sort order (DESC, DESC)
+        queryBuilder.where(
+          '(user.createdAt < :cursorDate OR (user.createdAt = :cursorDate AND user.id < :cursorId))',
+          {
+            cursorDate: cursorUser.createdAt,
+            cursorId: cursor,
+          },
+        );
+      }
+    }
+
+    const results = await queryBuilder.getMany();
+    const hasMore = results.length > limit;
+    const data = hasMore ? results.slice(0, limit) : results;
+
+    return new CursorPaginatedResponseDto<User>(
+      data,
+      hasMore,
+      limit,
+      (user: User) => user.id,
+    );
   }
 
   async findOne(id: string): Promise<User | null> {
