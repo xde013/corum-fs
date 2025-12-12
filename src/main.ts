@@ -5,12 +5,15 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: true }),
   );
+
+  const configService = app.get(ConfigService);
 
   // Swagger configuration
   const config = new DocumentBuilder()
@@ -21,7 +24,8 @@ async function bootstrap() {
   const documentFactory = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  const port = configService.get<number>('PORT', 3000);
+  await app.listen(port, '0.0.0.0');
 }
 
 bootstrap();

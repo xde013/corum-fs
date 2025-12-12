@@ -34,8 +34,8 @@ export class UsersController {
     description: 'The user has been successfully created.',
     type: User,
   })
-  create(@Body() createUserDto: CreateUserDto): User {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
+    return await this.usersService.create(createUserDto);
   }
 
   @Get()
@@ -45,8 +45,8 @@ export class UsersController {
     description: 'Returns all users.',
     type: [User],
   })
-  findAll(): User[] {
-    return this.usersService.findAll();
+  async findAll(): Promise<User[]> {
+    return await this.usersService.findAll();
   }
 
   @Get(':id')
@@ -61,8 +61,8 @@ export class UsersController {
     status: HttpStatus.NOT_FOUND,
     description: 'User not found.',
   })
-  findOne(@Param('id') id: string): User {
-    const user = this.usersService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<User> {
+    const user = await this.usersService.findOne(+id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -82,8 +82,11 @@ export class UsersController {
     status: HttpStatus.NOT_FOUND,
     description: 'User not found.',
   })
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): User {
-    const user = this.usersService.update(+id, updateUserDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    const user = await this.usersService.update(+id, updateUserDto);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -101,8 +104,8 @@ export class UsersController {
     status: HttpStatus.NOT_FOUND,
     description: 'User not found.',
   })
-  remove(@Param('id') id: string): { message: string } {
-    const deleted = this.usersService.remove(+id);
+  async remove(@Param('id') id: string): Promise<{ message: string }> {
+    const deleted = await this.usersService.remove(+id);
     if (!deleted) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }

@@ -1,56 +1,56 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { USER_REPOSITORY } from './users.constants';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [];
-  private currentId = 1;
+  constructor(
+    @Inject(USER_REPOSITORY)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-  create(createUserDto: CreateUserDto): User {
-    const user: User = {
-      id: this.currentId++,
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const user = this.userRepository.create({
       ...createUserDto,
       birthdate: new Date(createUserDto.birthdate),
-    };
-    this.users.push(user);
-    return user;
+    });
+    return await this.userRepository.save(user);
   }
 
-  findAll(): User[] {
-    return this.users;
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.find();
   }
 
-  findOne(id: number): User | undefined {
-    return this.users.find((user) => user.id === id);
+  async findOne(id: number): Promise<User | null> {
+    return await this.userRepository.findOne({ where: { id } });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto): User | undefined {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-    if (userIndex === -1) {
-      return undefined;
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.userRepository.findOne({ where: { email } });
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User | null> {
+    const user = await this.findOne(id);
+    if (!user) {
+      return null;
     }
 
-    const updatedUser = {
-      ...this.users[userIndex],
+    const updatedData = {
       ...updateUserDto,
       ...(updateUserDto.birthdate && {
         birthdate: new Date(updateUserDto.birthdate),
       }),
     };
 
-    this.users[userIndex] = updatedUser;
-    return updatedUser;
+    await this.userRepository.update(id, updatedData);
+    return await this.findOne(id);
   }
 
-  remove(id: number): boolean {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-    if (userIndex === -1) {
-      return false;
-    }
-
-    this.users.splice(userIndex, 1);
-    return true;
+  async remove(id: number): Promise<boolean> {
+    const result = await this.userRepository.delete(id);
+    return (result.affected ?? 0) > 0;
   }
 }
