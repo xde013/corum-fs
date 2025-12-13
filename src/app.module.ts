@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { HealthModule } from './health/health.module';
 import { validate } from './config/env.validation';
 import { getThrottlerConfig } from './config/throttler.config';
 
@@ -25,6 +26,7 @@ import { getThrottlerConfig } from './config/throttler.config';
     DatabaseModule,
     UsersModule,
     AuthModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [
