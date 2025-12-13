@@ -1,8 +1,31 @@
 import { Module } from '@nestjs/common';
-import { databaseProviders } from './database.providers';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Module({
-  providers: [...databaseProviders],
-  exports: [...databaseProviders],
+  imports: [
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const isProduction = configService.get('NODE_ENV') === 'production';
+        const certificatePath = path.join(process.cwd(), 'ca.pem');
+
+        return {
+          type: 'postgres',
+          url: configService.get<string>('DATABASE_URL'),
+          entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+          synchronize: !isProduction,
+          logging: !isProduction,
+          ssl: {
+            rejectUnauthorized: true,
+            ca: fs.readFileSync(certificatePath).toString(),
+          },
+        };
+      },
+    }),
+  ],
 })
 export class DatabaseModule {}

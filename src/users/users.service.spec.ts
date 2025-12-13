@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
-import { USER_REPOSITORY } from './users.constants';
 import { SortField, SortOrder } from './dto/cursor-pagination.dto';
 
 describe('UsersService', () => {
@@ -64,7 +64,7 @@ describe('UsersService', () => {
       providers: [
         UsersService,
         {
-          provide: USER_REPOSITORY,
+          provide: getRepositoryToken(User),
           useValue: mockRepository,
         },
       ],

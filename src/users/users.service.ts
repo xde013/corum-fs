@@ -1,16 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto';
 import { SortField, SortOrder } from './dto/cursor-pagination.dto';
 import { User } from './entities/user.entity';
-import { USER_REPOSITORY } from './users.constants';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
 
