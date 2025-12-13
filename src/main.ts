@@ -36,9 +36,13 @@ async function bootstrap() {
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Corum FS API')
-    .setDescription('The Corum FS API documentation')
+    .setDescription('API for the Corum User Management System')
     .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
+    .addTag('auth', 'Authentication endpoints (register, login, refresh)')
+    .addTag('users', 'User management endpoints (CRUD operations)')
     .build();
+
   const documentFactory = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 

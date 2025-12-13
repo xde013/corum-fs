@@ -18,6 +18,7 @@ import {
   ApiParam,
   ApiBody,
   ApiQuery,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -28,6 +29,7 @@ import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto'
 import { User } from './entities/user.entity';
 
 @ApiTags('users')
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -39,6 +41,10 @@ export class UsersController {
     status: HttpStatus.CREATED,
     description: 'The user has been successfully created.',
     type: User,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized - Invalid or missing JWT token',
   })
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return await this.usersService.create(createUserDto);
@@ -124,6 +130,10 @@ export class UsersController {
       },
     },
   })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
   async findAll(
     @Query() paginationDto: CursorPaginationDto,
   ): Promise<CursorPaginatedResponseDto<User>> {
@@ -152,6 +162,10 @@ export class UsersController {
     status: HttpStatus.NOT_FOUND,
     description: 'User not found.',
   })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
   async findOne(@Param('id') id: string): Promise<User> {
     const user = await this.usersService.findOne(id);
     if (!user) {
@@ -177,6 +191,10 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'User not found.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized - Invalid or missing JWT token',
   })
   async update(
     @Param('id') id: string,
@@ -204,6 +222,10 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'User not found.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized - Invalid or missing JWT token',
   })
   async remove(@Param('id') id: string): Promise<{ message: string }> {
     const deleted = await this.usersService.remove(id);
@@ -240,6 +262,10 @@ export class UsersController {
         },
       },
     },
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized - Invalid or missing JWT token',
   })
   async bulkRemove(
     @Body() bulkDeleteUsersDto: BulkDeleteUsersDto,
