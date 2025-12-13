@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto';
+import { SortField, SortOrder } from './dto/cursor-pagination.dto';
 import { User } from './entities/user.entity';
 import { USER_REPOSITORY } from './users.constants';
 
@@ -28,14 +29,16 @@ export class UsersService {
   async findAllCursorPaginated(
     cursor?: string,
     limit: number = 10,
+    sortBy: SortField = SortField.CREATED_AT,
+    sortOrder: SortOrder = SortOrder.DESC,
   ): Promise<CursorPaginatedResponseDto<User>> {
     // Check if there are more results
     const take = limit + 1;
 
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
-      .orderBy('user.createdAt', 'DESC')
-      .addOrderBy('user.id', 'DESC')
+      .orderBy(`user.${sortBy}`, sortOrder)
+      .addOrderBy('user.id', sortOrder)
       .take(take);
 
     // If cursor is provided, fetch records after that cursor
@@ -45,12 +48,15 @@ export class UsersService {
       });
 
       if (cursorUser) {
-        // Use WHERE to handle ties in createdAt (rarely happens)
-        // maintain consistent sort order (DESC, DESC)
+        // Build the WHERE clause based on sort order and field
+        const cursorValue = cursorUser[sortBy];
+        const operator = sortOrder === SortOrder.DESC ? '<' : '>';
+
+        // Handle ties in sortBy field by using id as tiebreaker
         queryBuilder.where(
-          '(user.createdAt < :cursorDate OR (user.createdAt = :cursorDate AND user.id < :cursorId))',
+          `(user.${sortBy} ${operator} :cursorValue OR (user.${sortBy} = :cursorValue AND user.id ${operator} :cursorId))`,
           {
-            cursorDate: cursorUser.createdAt,
+            cursorValue,
             cursorId: cursor,
           },
         );

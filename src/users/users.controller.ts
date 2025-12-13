@@ -46,9 +46,9 @@ export class UsersController {
 
   @Get()
   @ApiOperation({
-    summary: 'Get all users with cursor-based pagination',
+    summary: 'Get all users with cursor-based pagination and sorting',
     description:
-      'Efficient pagination for large datasets. Use nextCursor from response for subsequent requests.',
+      'Efficient pagination for large datasets. Use nextCursor from response for subsequent requests. Supports sorting by multiple fields.',
   })
   @ApiQuery({
     name: 'cursor',
@@ -63,6 +63,27 @@ export class UsersController {
     type: Number,
     description: 'Number of items to return (max 100)',
     example: 10,
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: [
+      'createdAt',
+      'updatedAt',
+      'firstName',
+      'lastName',
+      'email',
+      'birthdate',
+    ],
+    description: 'Field to sort by',
+    example: 'createdAt',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['ASC', 'DESC'],
+    description: 'Sort order',
+    example: 'DESC',
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -109,6 +130,8 @@ export class UsersController {
     return await this.usersService.findAllCursorPaginated(
       paginationDto.cursor,
       paginationDto.limit,
+      paginationDto.sortBy,
+      paginationDto.sortOrder,
     );
   }
 
