@@ -41,6 +41,18 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   JWT_REFRESH_EXPIRATION: string = '7d';
+
+  @IsNumber()
+  @IsOptional()
+  THROTTLE_SHORT_LIMIT: number = 10;
+
+  @IsNumber()
+  @IsOptional()
+  THROTTLE_MEDIUM_LIMIT: number = 20;
+
+  @IsNumber()
+  @IsOptional()
+  THROTTLE_LONG_LIMIT: number = 100;
 }
 
 export function validate(config: Record<string, unknown>) {

@@ -14,6 +14,7 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -30,11 +31,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Throttle({ short: { limit: 3, ttl: 60_000 } }) // 3 requests per minute
   @Post('register')
   @ApiOperation({
     summary: 'Register a new user',
     description:
-      'Creates a new user account with secure password hashing and returns JWT tokens',
+      'Creates a new user account with secure password hashing and returns JWT tokens. Rate limited to 3 requests per minute.',
   })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({
@@ -63,16 +65,22 @@ export class AuthController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid input data',
   })
+  @ApiResponse({
+    status: HttpStatus.TOO_MANY_REQUESTS,
+    description: 'Too many registration attempts. Please try again later.',
+  })
   async register(@Body() registerDto: RegisterDto): Promise<AuthResponse> {
     return await this.authService.register(registerDto);
   }
 
   @Public()
+  @Throttle({ short: { limit: 5, ttl: 60_000 } }) // 5 requests per minute
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Login with email and password',
-    description: 'Authenticates user and returns JWT tokens',
+    description:
+      'Authenticates user and returns JWT tokens. Rate limited to 5 requests per minute to prevent brute force attacks.',
   })
   @ApiBody({ type: LoginDto })
   @ApiResponse({
@@ -97,18 +105,23 @@ export class AuthController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid credentials',
   })
+  @ApiResponse({
+    status: HttpStatus.TOO_MANY_REQUESTS,
+    description: 'Too many login attempts. Please try again later.',
+  })
   async login(@Body() loginDto: LoginDto): Promise<AuthResponse> {
     return await this.authService.login(loginDto);
   }
 
   @Public()
+  @Throttle({ medium: { limit: 10, ttl: 60_000 } }) // 10 requests per minute
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshAuthGuard)
   @ApiOperation({
     summary: 'Refresh access token',
     description:
-      'Uses refresh token to generate a new access token and refresh token',
+      'Uses refresh token to generate a new access token and refresh token. Rate limited to 10 requests per minute.',
   })
   @ApiBody({ type: RefreshTokenDto })
   @ApiResponse({
@@ -132,6 +145,10 @@ export class AuthController {
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid or expired refresh token',
+  })
+  @ApiResponse({
+    status: HttpStatus.TOO_MANY_REQUESTS,
+    description: 'Too many refresh attempts. Please try again later.',
   })
   async refreshTokens(@CurrentUser() user: User): Promise<AuthResponse> {
     return await this.authService.refreshTokens(user);
