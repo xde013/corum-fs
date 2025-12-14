@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiCheckCircle } from 'react-icons/fi';
 import { useFormSubmission } from '@/shared/hooks/useFormSubmission';
+import { toast } from 'react-hot-toast';
 
 export const ForgotPasswordForm = () => {
   const [resetLink, setResetLink] = useState<string | null>(null);
@@ -37,8 +38,6 @@ export const ForgotPasswordForm = () => {
     }
   }, [prefilledEmail, setValue]);
 
-  // Example values - in production, these would come from the API response
-
   const forgotPasswordOperation = async (email: string) => {
     await authService.forgotPassword({ email });
   };
@@ -56,7 +55,7 @@ export const ForgotPasswordForm = () => {
       setResetLink(`${window.location.origin}/auth/reset-password?token=${trimmedEmail}`);
       reset();
     } catch {
-      // Error is handled by useFormSubmission
+      toast.error('An error occurred. Please try again.');
     }
   };
 
