@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@/shared/utils/testUtils';
+import { renderHook, waitFor, act } from '@/shared/utils/testUtils';
 import { useAsyncOperation } from './useAsyncOperation';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -21,14 +21,19 @@ describe('useAsyncOperation', () => {
     ) as (arg?: string) => Promise<string>;
     const { result } = renderHook(() => useAsyncOperation(mockOperation));
 
-    const promise = result.current.execute('test');
+    let promise: Promise<string | undefined>;
+    await act(async () => {
+      promise = result.current.execute('test') as Promise<string | undefined>;
+    });
     
     // Wait for loading state to be set (React state updates are async)
     await waitFor(() => {
       expect(result.current.isLoading).toBe(true);
     });
     
-    await promise;
+    await act(async () => {
+      await promise!;
+    });
     
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -39,8 +44,11 @@ describe('useAsyncOperation', () => {
     const mockOperation = vi.fn().mockResolvedValue('success');
     const { result } = renderHook(() => useAsyncOperation(mockOperation));
 
-    const executePromise = result.current.execute('arg1', 'arg2');
-    const value = await executePromise;
+    let value: string | undefined;
+    await act(async () => {
+      const executePromise = result.current.execute('arg1', 'arg2');
+      value = await executePromise;
+    });
 
     expect(mockOperation).toHaveBeenCalledWith('arg1', 'arg2');
     expect(value).toBe('success');
@@ -53,11 +61,13 @@ describe('useAsyncOperation', () => {
     const mockOperation = vi.fn().mockRejectedValue(error);
     const { result } = renderHook(() => useAsyncOperation(mockOperation));
 
-    try {
-      await result.current.execute();
-    } catch (e) {
-      expect(e).toBe(error);
-    }
+    await act(async () => {
+      try {
+        await result.current.execute();
+      } catch (e) {
+        expect(e).toBe(error);
+      }
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -76,22 +86,26 @@ describe('useAsyncOperation', () => {
     const { result } = renderHook(() => useAsyncOperation(mockOperation));
 
     // First execution with error
-    try {
-      await result.current.execute();
-    } catch {
-      // Expected
-    }
+    await act(async () => {
+      try {
+        await result.current.execute();
+      } catch {
+        // Expected
+      }
+    });
 
     await waitFor(() => {
       expect(result.current.error).toBe(error1);
     });
 
     // Second execution should reset error
-    try {
-      await result.current.execute();
-    } catch {
-      // Expected
-    }
+    await act(async () => {
+      try {
+        await result.current.execute();
+      } catch {
+        // Expected
+      }
+    });
 
     await waitFor(() => {
       expect(result.current.error).toBe(error2);
@@ -102,7 +116,10 @@ describe('useAsyncOperation', () => {
     const mockOperation = vi.fn().mockResolvedValue({ id: 1, name: 'Test' });
     const { result } = renderHook(() => useAsyncOperation(mockOperation));
 
-    const value = await result.current.execute();
+    let value: { id: number; name: string } | undefined;
+    await act(async () => {
+      value = await result.current.execute();
+    });
 
     expect(value).toEqual({ id: 1, name: 'Test' });
   });
