@@ -11,6 +11,15 @@ import {
 import { Role } from '../enums/role.enum';
 
 @Entity('users')
+// Composite index for admin queries (role + createdAt)
+@Index('IDX_users_role_created_at', ['role', 'createdAt'])
+// PostgreSQL can use leading columns)
+@Index('IDX_users_created_at_id', ['createdAt', 'id'])
+@Index('IDX_users_updated_at_id', ['updatedAt', 'id'])
+@Index('IDX_users_first_name_id', ['firstName', 'id'])
+@Index('IDX_users_last_name_id', ['lastName', 'id'])
+@Index('IDX_users_email_id', ['email', 'id'])
+@Index('IDX_users_birthdate_id', ['birthdate', 'id'])
 export class User {
   @ApiProperty({
     example: '550e8400-e29b-41d4-a716-446655440000',
@@ -72,7 +81,6 @@ export class User {
     description: 'The date the user was created',
   })
   @CreateDateColumn()
-  @Index('IDX_users_created_at')
   createdAt: Date;
 
   @ApiProperty({

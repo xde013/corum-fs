@@ -215,7 +215,7 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({
-    summary: 'Get a user by ID',
+    summary: 'Get a user by ID (Admin only)',
     description:
       'Users can only view their own profile. Admins can view any user.',
   })
@@ -277,7 +277,7 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({
-    summary: 'Update a user',
+    summary: 'Update a user (Admin only)',
     description: 'Admins can update any user field.',
   })
   @ApiParam({
