@@ -121,6 +121,23 @@ export class UsersService {
     return await this.userRepository.findOne({ where: { email } });
   }
 
+  async findByResetToken(token: string): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: { passwordResetToken: token },
+    });
+  }
+
+  async updatePasswordResetToken(
+    id: string,
+    token: string | null,
+    expires: Date | null,
+  ): Promise<void> {
+    await this.userRepository.update(id, {
+      passwordResetToken: token ?? undefined,
+      passwordResetExpires: expires ?? undefined,
+    });
+  }
+
   async update(
     id: string,
     updateUserDto: UpdateUserDto | UpdateSelfDto,

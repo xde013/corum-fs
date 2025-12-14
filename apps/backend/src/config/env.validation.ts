@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsEnum,
   MinLength,
+  Min,
   validateSync,
   IsOptional,
 } from 'class-validator';
@@ -53,6 +54,11 @@ class EnvironmentVariables {
   @IsNumber()
   @IsOptional()
   THROTTLE_LONG_LIMIT: number = 100;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  PASSWORD_RESET_EXPIRY_HOURS: number = 1;
 }
 
 export function validate(config: Record<string, unknown>) {

@@ -89,4 +89,14 @@ export class User {
   })
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ApiHideProperty()
+  @Column({ nullable: true })
+  @Exclude()
+  passwordResetToken?: string;
+
+  @ApiHideProperty()
+  @Column({ nullable: true })
+  @Exclude()
+  passwordResetExpires?: Date;
 }

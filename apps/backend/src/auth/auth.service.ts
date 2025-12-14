@@ -2,17 +2,25 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AuthResponse } from './interfaces/auth-response.interface';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../users/enums/role.enum';
+import {
+  ENV_KEYS,
+  PASSWORD_RESET_DEFAULT_EXPIRY_HOURS,
+} from '../config/config.constants';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +29,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -101,7 +109,7 @@ export class AuthService {
   }
 
   private async generateTokens(
-    user: User,
+    user: User
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const payload: JwtPayload = {
       sub: user.id,
@@ -149,5 +157,89 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{
+    message: string;
+  }> {
+    const user = await this.usersService.findByEmail(forgotPasswordDto.email);
+
+    // Don't reveal if user exists to prevent user enumeration
+    if (!user) {
+      // Return success message even if user doesn't exist (security best practice)
+      return {
+        message:
+          'If an account with that email exists, a password reset link has been sent.',
+      };
+    }
+
+    // Generate secure reset token
+    const resetToken = this.generateResetToken();
+    const resetTokenExpiry = new Date();
+    const expiryHours = this.configService.get<number>(
+      ENV_KEYS.PASSWORD_RESET_EXPIRY_HOURS,
+      PASSWORD_RESET_DEFAULT_EXPIRY_HOURS
+    );
+    resetTokenExpiry.setHours(resetTokenExpiry.getHours() + expiryHours);
+
+    // Save reset token to user
+    await this.usersService.updatePasswordResetToken(
+      user.id,
+      resetToken,
+      resetTokenExpiry
+    );
+
+    // const resetUrl = `${this.configService.get('FRONTEND_URL')}/reset-password?token=${resetToken}`;
+    // await this.emailService.sendPasswordResetEmail(user.email, resetUrl);
+
+    // For now, log the token
+    console.log(
+      `Password reset token for ${user.email}: ${resetToken} (expires: ${resetTokenExpiry.toISOString()})`
+    );
+
+    return {
+      message:
+        'If an account with that email exists, a password reset link has been sent.',
+    };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{
+    message: string;
+  }> {
+    // Find user by reset token
+    const user = await this.usersService.findByResetToken(
+      resetPasswordDto.token
+    );
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    // Check if token has expired
+    if (!user.passwordResetExpires || user.passwordResetExpires < new Date()) {
+      // Clear expired token
+      await this.usersService.updatePasswordResetToken(user.id, null, null);
+      throw new BadRequestException('Reset token has expired');
+    }
+
+    // Hash new password
+    const hashedPassword = await this.hashPassword(
+      resetPasswordDto.newPassword
+    );
+
+    // Update password and clear reset token
+    await this.usersService.updatePasswordResetToken(user.id, null, null);
+    await this.usersService.update(user.id, {
+      password: hashedPassword,
+    } as any);
+
+    return {
+      message: 'Password has been successfully reset',
+    };
+  }
+
+  private generateResetToken(): string {
+    // Generate a secure random token
+    return randomBytes(32).toString('hex');
   }
 }

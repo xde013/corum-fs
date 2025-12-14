@@ -1,3 +1,6 @@
+// Password Reset Constants
+export const PASSWORD_RESET_DEFAULT_EXPIRY_HOURS = 1;
+
 // Environment variable keys
 export const ENV_KEYS = {
   // Database
@@ -12,6 +15,9 @@ export const ENV_KEYS = {
   JWT_REFRESH_SECRET: 'JWT_REFRESH_SECRET',
   JWT_ACCESS_EXPIRATION: 'JWT_ACCESS_EXPIRATION',
   JWT_REFRESH_EXPIRATION: 'JWT_REFRESH_EXPIRATION',
+
+  // Password Reset
+  PASSWORD_RESET_EXPIRY_HOURS: 'PASSWORD_RESET_EXPIRY_HOURS',
 
   // Throttle/Rate Limiting
   THROTTLE_SHORT_LIMIT: 'THROTTLE_SHORT_LIMIT',
