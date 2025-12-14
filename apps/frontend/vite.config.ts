@@ -22,6 +22,23 @@ export default defineConfig({
     }),
     tailwindcss(),
   ],
+  build: {
+    minify: 'terser',
+    cssCodeSplit: true,
+    sourcemap: false,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'table-vendor': ['@tanstack/react-table'],
+          'ui-vendor': ['react-hot-toast', 'react-day-picker', 'react-icons'],
+          'utils-vendor': ['date-fns', 'axios'],
+        },
+      },
+    },
+  },
   server: {
     port: 3000,
     proxy: {

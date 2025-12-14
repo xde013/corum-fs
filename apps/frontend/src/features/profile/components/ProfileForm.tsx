@@ -4,7 +4,7 @@ import { DatePicker } from '@/shared/components/forms/DatePicker';
 import { Button } from '@/shared/components/ui/Button';
 import { profileSchema, type ProfileFormData } from '@/shared/utils/validation';
 import type { User } from '@/shared/types';
-import { format } from 'date-fns';
+import { format } from 'date-fns/format';
 import { NameFields } from '@/shared/components/forms/NameFields';
 import { EmailField } from '@/shared/components/forms/EmailField';
 

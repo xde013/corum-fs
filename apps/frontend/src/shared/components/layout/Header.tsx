@@ -20,7 +20,7 @@ export const Header = () => {
               onClick={() => navigate('/dashboard')}
               className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors cursor-pointer"
             >
-              Admin Portal
+              Corum
             </button>
           </div>
 
