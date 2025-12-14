@@ -26,13 +26,15 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      await login(data.email, data.password);
+      // Trim email input
+      await login(data.email.trim(), data.password);
       toast.success('Welcome back!');
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
       toast.error(
-        err.response?.data?.message || 'Invalid email or password. Please try again.'
-      );
+        err.response?.data?.message || 'Invalid email or password. Please try again.',
+          { duration: 10_000 }
+        );
     } finally {
       setIsLoading(false);
     }

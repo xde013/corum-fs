@@ -1,11 +1,17 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/routing/ProtectedRoute';
-import { LoginPage } from './pages/auth/LoginPage';
-import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
-import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
-import { DashboardPage } from './pages/DashboardPage';
+import { AppLayout } from './components/layout/AppLayout';
+import { LoadingSpinner } from './components/ui/LoadingSpinner';
+
+// Lazy load pages
+const LoginPage = lazy(() => import('./pages/auth/LoginPage').then(module => ({ default: module.LoginPage })));
+const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage').then(module => ({ default: module.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage').then(module => ({ default: module.ResetPasswordPage })));
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then(module => ({ default: module.DashboardPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(module => ({ default: module.ProfilePage })));
 
 function App() {
   return (
@@ -35,16 +41,53 @@ function App() {
       />
       <Routes>
         {/* Public routes */}
-        <Route path="/auth/login" element={<LoginPage />} />
-        <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+        <Route
+          path="/auth/login"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <LoginPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/auth/forgot-password"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ForgotPasswordPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/auth/reset-password"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ResetPasswordPage />
+            </Suspense>
+          }
+        />
 
         {/* Protected routes */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <DashboardPage />
+              <AppLayout>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <DashboardPage />
+                </Suspense>
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ProfilePage />
+                </Suspense>
+              </AppLayout>
             </ProtectedRoute>
           }
         />

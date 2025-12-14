@@ -27,7 +27,8 @@ export const ForgotPasswordForm = () => {
     setIsLoading(true);
 
     try {
-      await authService.forgotPassword(data);
+      // Trim email input
+      await authService.forgotPassword({ email: data.email.trim() });
       toast.success(
         'If an account with that email exists, a password reset link has been sent.',
         { duration: 6000 }
