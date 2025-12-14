@@ -10,7 +10,7 @@ import { User } from '../../users/entities/user.entity';
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private configService: ConfigService,
-    private usersService: UsersService,
+    private usersService: UsersService
   ) {
     const secret = configService.get<string>('JWT_SECRET');
     if (!secret) {

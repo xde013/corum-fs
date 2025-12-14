@@ -17,7 +17,7 @@ export class HealthController {
     private health: HealthCheckService,
     private db: TypeOrmHealthIndicator,
     private memory: MemoryHealthIndicator,
-    private disk: DiskHealthIndicator,
+    private disk: DiskHealthIndicator
   ) {}
 
   @Get()

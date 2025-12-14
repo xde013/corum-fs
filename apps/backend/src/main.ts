@@ -13,7 +13,7 @@ import helmet from '@fastify/helmet';
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter({ logger: true }),
+    new FastifyAdapter({ logger: true })
   );
 
   const configService = app.get(ConfigService);
@@ -27,7 +27,7 @@ async function bootstrap() {
       whitelist: true, // Remove properties that are not in the DTO
       forbidNonWhitelisted: true, // Throw an error if a property that is not in the DTO is provided
       transform: true, // Transform the request body to the DTO type
-    }),
+    })
   );
 
   // Enable class-transformer serialization globally
@@ -50,4 +50,4 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
 }
 
-bootstrap();
+void bootstrap();

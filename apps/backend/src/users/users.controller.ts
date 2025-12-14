@@ -132,7 +132,8 @@ export class UsersController {
     name: 'search',
     required: false,
     type: String,
-    description: 'Search across email, first name, and last name (partial match, case-insensitive). If provided, individual filters (firstName, lastName, email) are ignored.',
+    description:
+      'Search across email, first name, and last name (partial match, case-insensitive). If provided, individual filters (firstName, lastName, email) are ignored.',
     example: 'john',
   })
   @ApiResponse({
@@ -183,7 +184,7 @@ export class UsersController {
     description: 'Forbidden - Admin role required',
   })
   async findAll(
-    @Query() queryDto: UserListQueryDto,
+    @Query() queryDto: UserListQueryDto
   ): Promise<CursorPaginatedResponseDto<User>> {
     const filters =
       queryDto.search ||
@@ -203,7 +204,7 @@ export class UsersController {
       queryDto.limit,
       queryDto.sortBy,
       queryDto.sortOrder,
-      filters,
+      filters
     );
   }
 
@@ -279,7 +280,7 @@ export class UsersController {
   })
   async updateMe(
     @CurrentUser() currentUser: User,
-    @Body() updateSelfDto: UpdateSelfDto,
+    @Body() updateSelfDto: UpdateSelfDto
   ): Promise<User> {
     return await this.usersService.update(currentUser.id, updateSelfDto);
   }
@@ -313,7 +314,7 @@ export class UsersController {
   })
   async update(
     @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: UpdateUserDto
   ): Promise<User> {
     const user = await this.usersService.update(id, updateUserDto);
     if (!user) {
@@ -333,7 +334,7 @@ export class UsersController {
     description: 'Unauthorized - Invalid or missing JWT token',
   })
   async deleteMe(
-    @CurrentUser() currentUser: User,
+    @CurrentUser() currentUser: User
   ): Promise<{ message: string }> {
     const deleted = await this.usersService.remove(currentUser.id);
     if (!deleted) {
@@ -418,7 +419,7 @@ export class UsersController {
     description: 'Forbidden - Admin role required',
   })
   async bulkRemove(
-    @Body() bulkDeleteUsersDto: BulkDeleteUsersDto,
+    @Body() bulkDeleteUsersDto: BulkDeleteUsersDto
   ): Promise<{ deleted: number; failed: string[]; message: string }> {
     const result = await this.usersService.bulkRemove(bulkDeleteUsersDto.ids);
     return {
@@ -457,7 +458,7 @@ export class UsersController {
   })
   async updateRole(
     @Param('id') id: string,
-    @Body() updateUserRoleDto: UpdateUserRoleDto,
+    @Body() updateUserRoleDto: UpdateUserRoleDto
   ): Promise<User> {
     const user = await this.usersService.updateRole(id, updateUserRoleDto.role);
     if (!user) {

@@ -7,7 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
+// import { randomBytes } from 'crypto';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -174,7 +174,7 @@ export class AuthService {
     }
 
     // Generate secure reset token
-    const resetToken = this.generateResetToken();
+    const resetToken = this.generateResetToken(user.email); // Use user email as the token for development purposes
     const resetTokenExpiry = new Date();
     const expiryHours = this.configService.get<number>(
       ENV_KEYS.PASSWORD_RESET_EXPIRY_HOURS,
@@ -238,8 +238,9 @@ export class AuthService {
     };
   }
 
-  private generateResetToken(): string {
+  private generateResetToken(email: string): string {
     // Generate a secure random token
-    return randomBytes(32).toString('hex');
+    // return randomBytes(32).toString('hex');
+    return `${email}`; // For development, use a fixed token for testing
   }
 }

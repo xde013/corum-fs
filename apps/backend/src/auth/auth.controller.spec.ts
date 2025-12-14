@@ -128,14 +128,14 @@ describe('AuthController', () => {
   });
 
   describe('getCurrentUser', () => {
-    it('should return the current authenticated user', async () => {
-      const result = await controller.getCurrentUser(mockUser);
+    it('should return the current authenticated user', () => {
+      const result = controller.getCurrentUser(mockUser);
 
       expect(result).toEqual(mockUser);
     });
 
-    it('should return user without password field in response', async () => {
-      const result = await controller.getCurrentUser(mockUser);
+    it('should return user without password field in response', () => {
+      const result = controller.getCurrentUser(mockUser);
 
       // Password should be excluded by class-transformer in actual responses
       expect(result).toHaveProperty('id');

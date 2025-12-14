@@ -44,7 +44,7 @@ export class CursorPaginatedResponseDto<T> {
     data: T[],
     hasMore: boolean,
     limit: number,
-    getIdFn: (item: T) => string,
+    getIdFn: (item: T) => string
   ) {
     this.data = data;
     this.meta = {
@@ -56,4 +56,3 @@ export class CursorPaginatedResponseDto<T> {
     };
   }
 }
-

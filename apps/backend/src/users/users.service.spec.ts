@@ -93,7 +93,7 @@ describe('UsersService', () => {
       expect(mockRepository.createQueryBuilder).toHaveBeenCalledWith('user');
       expect(queryBuilder.orderBy).toHaveBeenCalledWith(
         'user.createdAt',
-        'DESC',
+        'DESC'
       );
       expect(queryBuilder.addOrderBy).toHaveBeenCalledWith('user.id', 'DESC');
       expect(queryBuilder.take).toHaveBeenCalledWith(3); // limit + 1
@@ -109,12 +109,12 @@ describe('UsersService', () => {
         undefined,
         10,
         SortField.FIRST_NAME,
-        SortOrder.ASC,
+        SortOrder.ASC
       );
 
       expect(queryBuilder.orderBy).toHaveBeenCalledWith(
         'user.firstName',
-        'ASC',
+        'ASC'
       );
       expect(queryBuilder.addOrderBy).toHaveBeenCalledWith('user.id', 'ASC');
     });
@@ -127,12 +127,12 @@ describe('UsersService', () => {
         undefined,
         10,
         SortField.LAST_NAME,
-        SortOrder.DESC,
+        SortOrder.DESC
       );
 
       expect(queryBuilder.orderBy).toHaveBeenCalledWith(
         'user.lastName',
-        'DESC',
+        'DESC'
       );
       expect(queryBuilder.addOrderBy).toHaveBeenCalledWith('user.id', 'DESC');
     });
@@ -145,7 +145,7 @@ describe('UsersService', () => {
         undefined,
         10,
         SortField.EMAIL,
-        SortOrder.ASC,
+        SortOrder.ASC
       );
 
       expect(queryBuilder.orderBy).toHaveBeenCalledWith('user.email', 'ASC');
@@ -160,12 +160,12 @@ describe('UsersService', () => {
         undefined,
         10,
         SortField.BIRTHDATE,
-        SortOrder.DESC,
+        SortOrder.DESC
       );
 
       expect(queryBuilder.orderBy).toHaveBeenCalledWith(
         'user.birthdate',
-        'DESC',
+        'DESC'
       );
       expect(queryBuilder.addOrderBy).toHaveBeenCalledWith('user.id', 'DESC');
     });
@@ -178,12 +178,12 @@ describe('UsersService', () => {
         undefined,
         10,
         SortField.UPDATED_AT,
-        SortOrder.ASC,
+        SortOrder.ASC
       );
 
       expect(queryBuilder.orderBy).toHaveBeenCalledWith(
         'user.updatedAt',
-        'ASC',
+        'ASC'
       );
       expect(queryBuilder.addOrderBy).toHaveBeenCalledWith('user.id', 'ASC');
     });
@@ -199,7 +199,7 @@ describe('UsersService', () => {
         '1',
         10,
         SortField.CREATED_AT,
-        SortOrder.DESC,
+        SortOrder.DESC
       );
 
       expect(mockRepository.findOne).toHaveBeenCalledWith({
@@ -210,7 +210,7 @@ describe('UsersService', () => {
         {
           cursorValue: cursorUser.createdAt,
           cursorId: '1',
-        },
+        }
       );
     });
 
@@ -225,7 +225,7 @@ describe('UsersService', () => {
         '1',
         10,
         SortField.FIRST_NAME,
-        SortOrder.ASC,
+        SortOrder.ASC
       );
 
       expect(mockRepository.findOne).toHaveBeenCalledWith({
@@ -236,7 +236,7 @@ describe('UsersService', () => {
         {
           cursorValue: cursorUser.firstName,
           cursorId: '1',
-        },
+        }
       );
     });
 
@@ -251,7 +251,7 @@ describe('UsersService', () => {
         '2',
         10,
         SortField.EMAIL,
-        SortOrder.DESC,
+        SortOrder.DESC
       );
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
@@ -259,7 +259,7 @@ describe('UsersService', () => {
         {
           cursorValue: cursorUser.email,
           cursorId: '2',
-        },
+        }
       );
     });
 
@@ -318,12 +318,12 @@ describe('UsersService', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { firstName: 'Alice' },
+        { firstName: 'Alice' }
       );
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         'LOWER(user.firstName) LIKE LOWER(:firstName)',
-        { firstName: '%Alice%' },
+        { firstName: '%Alice%' }
       );
     });
 
@@ -336,12 +336,12 @@ describe('UsersService', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { lastName: 'Brown' },
+        { lastName: 'Brown' }
       );
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         'LOWER(user.lastName) LIKE LOWER(:lastName)',
-        { lastName: '%Brown%' },
+        { lastName: '%Brown%' }
       );
     });
 
@@ -354,12 +354,12 @@ describe('UsersService', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { email: 'alice' },
+        { email: 'alice' }
       );
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         'LOWER(user.email) LIKE LOWER(:email)',
-        { email: '%alice%' },
+        { email: '%alice%' }
       );
     });
 
@@ -372,7 +372,7 @@ describe('UsersService', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { firstName: 'Alice', lastName: 'Anderson', email: 'example' },
+        { firstName: 'Alice', lastName: 'Anderson', email: 'example' }
       );
 
       expect(queryBuilder.andWhere).toHaveBeenCalledTimes(3);
@@ -389,16 +389,16 @@ describe('UsersService', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { firstName: 'Bob' },
+        { firstName: 'Bob' }
       );
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         'LOWER(user.firstName) LIKE LOWER(:firstName)',
-        { firstName: '%Bob%' },
+        { firstName: '%Bob%' }
       );
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         expect.stringContaining('user.createdAt'),
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 
@@ -411,12 +411,12 @@ describe('UsersService', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { search: 'alice' },
+        { search: 'alice' }
       );
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search))',
-        { search: '%alice%' },
+        { search: '%alice%' }
       );
     });
 
@@ -434,14 +434,14 @@ describe('UsersService', () => {
           firstName: 'Bob',
           lastName: 'Brown',
           email: 'test',
-        },
+        }
       );
 
       // Should only call andWhere once with the search query
       expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search))',
-        { search: '%alice%' },
+        { search: '%alice%' }
       );
     });
 
@@ -456,16 +456,16 @@ describe('UsersService', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { search: 'bob' },
+        { search: 'bob' }
       );
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search))',
-        { search: '%bob%' },
+        { search: '%bob%' }
       );
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         expect.stringContaining('user.createdAt'),
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 
@@ -478,12 +478,12 @@ describe('UsersService', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { search: 'ALICE' },
+        { search: 'ALICE' }
       );
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search))',
-        { search: '%ALICE%' },
+        { search: '%ALICE%' }
       );
     });
   });
@@ -564,7 +564,7 @@ describe('UsersService', () => {
       mockRepository.findOne.mockResolvedValue(null);
 
       await expect(
-        service.update('nonexistent', { firstName: 'Test' }),
+        service.update('nonexistent', { firstName: 'Test' })
       ).rejects.toThrow(NotFoundException);
     });
 

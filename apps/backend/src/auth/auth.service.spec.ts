@@ -115,10 +115,10 @@ describe('AuthService', () => {
       jest.spyOn(usersService, 'findByEmail').mockResolvedValue(mockUser);
 
       await expect(service.register(registerDto)).rejects.toThrow(
-        ConflictException,
+        ConflictException
       );
       await expect(service.register(registerDto)).rejects.toThrow(
-        'User with this email already exists',
+        'User with this email already exists'
       );
     });
   });
@@ -149,10 +149,10 @@ describe('AuthService', () => {
       jest.spyOn(usersService, 'findByEmail').mockResolvedValue(mockUser);
 
       await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
+        UnauthorizedException
       );
       await expect(service.login(loginDto)).rejects.toThrow(
-        'Invalid credentials',
+        'Invalid credentials'
       );
     });
 
@@ -160,7 +160,7 @@ describe('AuthService', () => {
       jest.spyOn(usersService, 'findByEmail').mockResolvedValue(null);
 
       await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
+        UnauthorizedException
       );
     });
 
@@ -190,7 +190,7 @@ describe('AuthService', () => {
 
       const result = await service.validateUser(
         'test@example.com',
-        'wrongpassword',
+        'wrongpassword'
       );
 
       expect(result).toBeNull();
@@ -202,7 +202,7 @@ describe('AuthService', () => {
 
       const result = await service.validateUser(
         'nonexistent@example.com',
-        'password',
+        'password'
       );
 
       expect(result).toBeNull();
@@ -252,7 +252,7 @@ describe('AuthService', () => {
       expect(result).toEqual(payload);
       expect(jwtService.verifyAsync).toHaveBeenCalledWith(
         'valid-refresh-token',
-        { secret: 'test-refresh-secret-key-min-32-chars-long' } as any,
+        { secret: 'test-refresh-secret-key-min-32-chars-long' } as any
       );
     });
 
@@ -262,10 +262,10 @@ describe('AuthService', () => {
         .mockRejectedValue(new Error('Invalid token'));
 
       await expect(service.verifyToken('invalid-token')).rejects.toThrow(
-        UnauthorizedException,
+        UnauthorizedException
       );
       await expect(service.verifyToken('invalid-token')).rejects.toThrow(
-        'Invalid or expired token',
+        'Invalid or expired token'
       );
     });
   });
@@ -292,7 +292,7 @@ describe('AuthService', () => {
           sub: mockUser.id,
           email: mockUser.email,
         }),
-        expect.any(Object),
+        expect.any(Object)
       );
     });
   });

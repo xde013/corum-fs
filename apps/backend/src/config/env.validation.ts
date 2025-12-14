@@ -72,7 +72,7 @@ export function validate(config: Record<string, unknown>) {
 
   if (errors.length > 0) {
     throw new Error(
-      `Environment validation failed:\n${errors.map((err) => Object.values(err.constraints || {}).join(', ')).join('\n')}`,
+      `Environment validation failed:\n${errors.map((err) => Object.values(err.constraints || {}).join(', ')).join('\n')}`
     );
   }
 

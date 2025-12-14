@@ -9,11 +9,11 @@ import { User } from '../../users/entities/user.entity';
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
-  'jwt-refresh',
+  'jwt-refresh'
 ) {
   constructor(
     private configService: ConfigService,
-    private usersService: UsersService,
+    private usersService: UsersService
   ) {
     const secret = configService.get<string>('JWT_REFRESH_SECRET');
     if (!secret) {

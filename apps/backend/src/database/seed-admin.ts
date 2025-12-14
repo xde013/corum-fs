@@ -38,7 +38,7 @@ async function seedAdmin() {
   const existingUser = await usersService.findByEmail(adminEmail);
   if (existingUser) {
     console.log(
-      `User with email ${adminEmail} already exists. Updating to admin role...`,
+      `User with email ${adminEmail} already exists. Updating to admin role...`
     );
     await usersService.updateRole(existingUser.id, Role.ADMIN);
     console.log(`✓ User ${adminEmail} has been promoted to admin`);
@@ -65,7 +65,7 @@ async function seedAdmin() {
     console.log(`  ID: ${admin.id}`);
     console.log(`  Role: ${admin.role}`);
     console.log(
-      '\n⚠️  IMPORTANT: Change the default password after first login!',
+      '\n⚠️  IMPORTANT: Change the default password after first login!'
     );
   } catch (error) {
     const errorMessage =

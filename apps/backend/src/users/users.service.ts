@@ -14,7 +14,7 @@ import { UserFiltersDto } from './dto/user-filters.dto';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -35,7 +35,7 @@ export class UsersService {
     limit: number = 10,
     sortBy: SortField = SortField.CREATED_AT,
     sortOrder: SortOrder = SortOrder.DESC,
-    filters?: UserFiltersDto,
+    filters?: UserFiltersDto
   ): Promise<CursorPaginatedResponseDto<User>> {
     // Check if there are more results
     const take = limit + 1;
@@ -54,7 +54,7 @@ export class UsersService {
           '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search))',
           {
             search: `%${filters.search}%`,
-          },
+          }
         );
       } else {
         // Individual filters (only apply if search is not provided)
@@ -63,7 +63,7 @@ export class UsersService {
             'LOWER(user.firstName) LIKE LOWER(:firstName)',
             {
               firstName: `%${filters.firstName}%`,
-            },
+            }
           );
         }
         if (filters.lastName) {
@@ -96,7 +96,7 @@ export class UsersService {
           {
             cursorValue,
             cursorId: cursor,
-          },
+          }
         );
       }
     }
@@ -109,7 +109,7 @@ export class UsersService {
       data,
       hasMore,
       limit,
-      (user: User) => user.id,
+      (user: User) => user.id
     );
   }
 
@@ -130,7 +130,7 @@ export class UsersService {
   async updatePasswordResetToken(
     id: string,
     token: string | null,
-    expires: Date | null,
+    expires: Date | null
   ): Promise<void> {
     await this.userRepository.update(id, {
       passwordResetToken: token ?? undefined,
@@ -140,7 +140,7 @@ export class UsersService {
 
   async update(
     id: string,
-    updateUserDto: UpdateUserDto | UpdateSelfDto,
+    updateUserDto: UpdateUserDto | UpdateSelfDto
   ): Promise<User> {
     const user = await this.findOne(id);
     if (!user) {
@@ -168,7 +168,7 @@ export class UsersService {
   }
 
   async bulkRemove(
-    ids: string[],
+    ids: string[]
   ): Promise<{ deleted: number; failed: string[] }> {
     if (!ids || ids.length === 0) {
       return { deleted: 0, failed: [] };

@@ -18,7 +18,7 @@ const DEFAULT_THROTTLE_VALUES = {
 
 // Global throttler configuration
 export const getThrottlerConfig = (
-  configService: ConfigService,
+  configService: ConfigService
 ): ThrottlerModuleOptions => {
   return [
     {
@@ -26,7 +26,7 @@ export const getThrottlerConfig = (
       ttl: THROTTLE_TTL.ONE_SECOND,
       limit: configService.get(
         ENV_KEYS.THROTTLE_SHORT_LIMIT,
-        DEFAULT_THROTTLE_VALUES.SHORT_LIMIT,
+        DEFAULT_THROTTLE_VALUES.SHORT_LIMIT
       ),
     },
     {
@@ -34,7 +34,7 @@ export const getThrottlerConfig = (
       ttl: THROTTLE_TTL.TEN_SECONDS,
       limit: configService.get(
         ENV_KEYS.THROTTLE_MEDIUM_LIMIT,
-        DEFAULT_THROTTLE_VALUES.MEDIUM_LIMIT,
+        DEFAULT_THROTTLE_VALUES.MEDIUM_LIMIT
       ),
     },
     {
@@ -42,7 +42,7 @@ export const getThrottlerConfig = (
       ttl: THROTTLE_TTL.ONE_MINUTE,
       limit: configService.get(
         ENV_KEYS.THROTTLE_LONG_LIMIT,
-        DEFAULT_THROTTLE_VALUES.LONG_LIMIT,
+        DEFAULT_THROTTLE_VALUES.LONG_LIMIT
       ),
     },
   ];

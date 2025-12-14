@@ -21,7 +21,8 @@ import { getThrottlerConfig } from './config/throttler.config';
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => getThrottlerConfig(configService),
+      useFactory: (configService: ConfigService) =>
+        getThrottlerConfig(configService),
     }),
     DatabaseModule,
     UsersModule,

@@ -4,5 +4,5 @@ import { UserFiltersDto } from './user-filters.dto';
 
 export class UserListQueryDto extends IntersectionType(
   CursorPaginationDto,
-  UserFiltersDto,
+  UserFiltersDto
 ) {}

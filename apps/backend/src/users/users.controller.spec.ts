@@ -90,7 +90,7 @@ describe('UsersController', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        undefined,
+        undefined
       );
       expect(result).toEqual(mockPaginatedResponse);
     });
@@ -110,7 +110,7 @@ describe('UsersController', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        undefined,
+        undefined
       );
     });
 
@@ -128,7 +128,7 @@ describe('UsersController', () => {
         25,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        undefined,
+        undefined
       );
     });
 
@@ -146,7 +146,7 @@ describe('UsersController', () => {
         10,
         SortField.FIRST_NAME,
         SortOrder.DESC,
-        undefined,
+        undefined
       );
     });
 
@@ -164,7 +164,7 @@ describe('UsersController', () => {
         10,
         SortField.LAST_NAME,
         SortOrder.DESC,
-        undefined,
+        undefined
       );
     });
 
@@ -182,7 +182,7 @@ describe('UsersController', () => {
         10,
         SortField.EMAIL,
         SortOrder.DESC,
-        undefined,
+        undefined
       );
     });
 
@@ -200,7 +200,7 @@ describe('UsersController', () => {
         10,
         SortField.BIRTHDATE,
         SortOrder.DESC,
-        undefined,
+        undefined
       );
     });
 
@@ -218,7 +218,7 @@ describe('UsersController', () => {
         10,
         SortField.UPDATED_AT,
         SortOrder.DESC,
-        undefined,
+        undefined
       );
     });
 
@@ -236,7 +236,7 @@ describe('UsersController', () => {
         10,
         SortField.FIRST_NAME,
         SortOrder.ASC,
-        undefined,
+        undefined
       );
     });
 
@@ -254,7 +254,7 @@ describe('UsersController', () => {
         10,
         SortField.FIRST_NAME,
         SortOrder.DESC,
-        undefined,
+        undefined
       );
     });
 
@@ -273,7 +273,7 @@ describe('UsersController', () => {
         50,
         SortField.EMAIL,
         SortOrder.ASC,
-        undefined,
+        undefined
       );
     });
 
@@ -297,7 +297,7 @@ describe('UsersController', () => {
           firstName: 'Alice',
           lastName: undefined,
           email: undefined,
-        },
+        }
       );
     });
 
@@ -321,7 +321,7 @@ describe('UsersController', () => {
           firstName: undefined,
           lastName: 'Brown',
           email: undefined,
-        },
+        }
       );
     });
 
@@ -345,7 +345,7 @@ describe('UsersController', () => {
           firstName: undefined,
           lastName: undefined,
           email: 'example.com',
-        },
+        }
       );
     });
 
@@ -371,7 +371,7 @@ describe('UsersController', () => {
           firstName: 'John',
           lastName: 'Doe',
           email: 'gmail',
-        },
+        }
       );
     });
 
@@ -389,7 +389,7 @@ describe('UsersController', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        undefined,
+        undefined
       );
     });
 
@@ -413,7 +413,7 @@ describe('UsersController', () => {
           firstName: undefined,
           lastName: undefined,
           email: undefined,
-        },
+        }
       );
     });
 
@@ -440,7 +440,7 @@ describe('UsersController', () => {
           firstName: 'John',
           lastName: 'Doe',
           email: 'test',
-        },
+        }
       );
     });
 
@@ -465,7 +465,7 @@ describe('UsersController', () => {
           firstName: undefined,
           lastName: undefined,
           email: undefined,
-        },
+        }
       );
     });
   });
