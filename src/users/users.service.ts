@@ -8,6 +8,7 @@ import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto'
 import { SortField, SortOrder } from './dto/cursor-pagination.dto';
 import { User } from './entities/user.entity';
 import { Role } from './enums/role.enum';
+import { UserFiltersDto } from './dto/user-filters.dto';
 
 @Injectable()
 export class UsersService {
@@ -34,6 +35,7 @@ export class UsersService {
     limit: number = 10,
     sortBy: SortField = SortField.CREATED_AT,
     sortOrder: SortOrder = SortOrder.DESC,
+    filters?: UserFiltersDto,
   ): Promise<CursorPaginatedResponseDto<User>> {
     // Check if there are more results
     const take = limit + 1;
@@ -43,6 +45,25 @@ export class UsersService {
       .orderBy(`user.${sortBy}`, sortOrder)
       .addOrderBy('user.id', sortOrder)
       .take(take);
+
+    // Apply filters
+    if (filters) {
+      if (filters.firstName) {
+        queryBuilder.andWhere('LOWER(user.firstName) LIKE LOWER(:firstName)', {
+          firstName: `%${filters.firstName}%`,
+        });
+      }
+      if (filters.lastName) {
+        queryBuilder.andWhere('LOWER(user.lastName) LIKE LOWER(:lastName)', {
+          lastName: `%${filters.lastName}%`,
+        });
+      }
+      if (filters.email) {
+        queryBuilder.andWhere('LOWER(user.email) LIKE LOWER(:email)', {
+          email: `%${filters.email}%`,
+        });
+      }
+    }
 
     // If cursor is provided, fetch records after that cursor
     if (cursor) {
@@ -56,7 +77,7 @@ export class UsersService {
         const operator = sortOrder === SortOrder.DESC ? '<' : '>';
 
         // Handle ties in sortBy field by using id as tiebreaker
-        queryBuilder.where(
+        queryBuilder.andWhere(
           `(user.${sortBy} ${operator} :cursorValue OR (user.${sortBy} = :cursorValue AND user.id ${operator} :cursorId))`,
           {
             cursorValue,
@@ -86,7 +107,10 @@ export class UsersService {
     return await this.userRepository.findOne({ where: { email } });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto | UpdateSelfDto): Promise<User> {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto | UpdateSelfDto,
+  ): Promise<User> {
     const user = await this.findOne(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);

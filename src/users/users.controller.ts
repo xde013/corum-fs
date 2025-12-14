@@ -27,7 +27,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateSelfDto } from './dto/update-self.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { BulkDeleteUsersDto } from './dto/bulk-delete-users.dto';
-import { CursorPaginationDto } from './dto/cursor-pagination.dto';
+import { UserListQueryDto } from './dto/user-list-query.dto';
 import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto';
 import { User } from './entities/user.entity';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -68,9 +68,9 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @ApiOperation({
     summary:
-      'Get all users with cursor-based pagination and sorting (Admin only)',
+      'Get all users with cursor-based pagination, sorting, and filtering (Admin only)',
     description:
-      'Efficient pagination for large datasets. Use nextCursor from response for subsequent requests. Supports sorting by multiple fields.',
+      'Efficient pagination for large datasets. Use nextCursor from response for subsequent requests. Supports sorting by multiple fields and filtering by firstName, lastName, and email.',
   })
   @ApiQuery({
     name: 'cursor',
@@ -106,6 +106,27 @@ export class UsersController {
     enum: ['ASC', 'DESC'],
     description: 'Sort order',
     example: 'DESC',
+  })
+  @ApiQuery({
+    name: 'firstName',
+    required: false,
+    type: String,
+    description: 'Filter by first name (partial match, case-insensitive)',
+    example: 'John',
+  })
+  @ApiQuery({
+    name: 'lastName',
+    required: false,
+    type: String,
+    description: 'Filter by last name (partial match, case-insensitive)',
+    example: 'Doe',
+  })
+  @ApiQuery({
+    name: 'email',
+    required: false,
+    type: String,
+    description: 'Filter by email (partial match, case-insensitive)',
+    example: 'example.com',
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -155,13 +176,23 @@ export class UsersController {
     description: 'Forbidden - Admin role required',
   })
   async findAll(
-    @Query() paginationDto: CursorPaginationDto,
+    @Query() queryDto: UserListQueryDto,
   ): Promise<CursorPaginatedResponseDto<User>> {
+    const filters =
+      queryDto.firstName || queryDto.lastName || queryDto.email
+        ? {
+            firstName: queryDto.firstName,
+            lastName: queryDto.lastName,
+            email: queryDto.email,
+          }
+        : undefined;
+
     return await this.usersService.findAllCursorPaginated(
-      paginationDto.cursor,
-      paginationDto.limit,
-      paginationDto.sortBy,
-      paginationDto.sortOrder,
+      queryDto.cursor,
+      queryDto.limit,
+      queryDto.sortBy,
+      queryDto.sortOrder,
+      filters,
     );
   }
 

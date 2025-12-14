@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { SortField, SortOrder } from './dto/cursor-pagination.dto';
+import { Role } from './enums/role.enum';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -16,6 +18,7 @@ describe('UsersService', () => {
       email: 'alice@example.com',
       password: 'hashedpassword1',
       birthdate: new Date('1990-01-01'),
+      role: Role.USER,
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
     },
@@ -26,6 +29,7 @@ describe('UsersService', () => {
       email: 'bob@example.com',
       password: 'hashedpassword2',
       birthdate: new Date('1991-02-02'),
+      role: Role.USER,
       createdAt: new Date('2024-01-02'),
       updatedAt: new Date('2024-01-02'),
     },
@@ -36,6 +40,7 @@ describe('UsersService', () => {
       email: 'charlie@example.com',
       password: 'hashedpassword3',
       birthdate: new Date('1992-03-03'),
+      role: Role.USER,
       createdAt: new Date('2024-01-03'),
       updatedAt: new Date('2024-01-03'),
     },
@@ -47,6 +52,7 @@ describe('UsersService', () => {
       addOrderBy: jest.fn().mockReturnThis(),
       take: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn().mockResolvedValue(mockUsers),
     };
 
@@ -199,7 +205,7 @@ describe('UsersService', () => {
       expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { id: '1' },
       });
-      expect(queryBuilder.where).toHaveBeenCalledWith(
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         '(user.createdAt < :cursorValue OR (user.createdAt = :cursorValue AND user.id < :cursorId))',
         {
           cursorValue: cursorUser.createdAt,
@@ -225,7 +231,7 @@ describe('UsersService', () => {
       expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { id: '1' },
       });
-      expect(queryBuilder.where).toHaveBeenCalledWith(
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         '(user.firstName > :cursorValue OR (user.firstName = :cursorValue AND user.id > :cursorId))',
         {
           cursorValue: cursorUser.firstName,
@@ -248,7 +254,7 @@ describe('UsersService', () => {
         SortOrder.DESC,
       );
 
-      expect(queryBuilder.where).toHaveBeenCalledWith(
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         '(user.email < :cursorValue OR (user.email = :cursorValue AND user.id < :cursorId))',
         {
           cursorValue: cursorUser.email,
@@ -288,7 +294,7 @@ describe('UsersService', () => {
 
       await service.findAllCursorPaginated('nonexistent', 10);
 
-      expect(queryBuilder.where).not.toHaveBeenCalled();
+      expect(queryBuilder.andWhere).not.toHaveBeenCalled();
     });
 
     it('should handle empty results', async () => {
@@ -302,10 +308,103 @@ describe('UsersService', () => {
       expect(result.meta.nextCursor).toBeNull();
       expect(result.meta.count).toBe(0);
     });
+
+    it('should filter by firstName', async () => {
+      const queryBuilder = mockRepository.createQueryBuilder();
+      queryBuilder.getMany.mockResolvedValue([mockUsers[0]]);
+
+      await service.findAllCursorPaginated(
+        undefined,
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        { firstName: 'Alice' },
+      );
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        'LOWER(user.firstName) LIKE LOWER(:firstName)',
+        { firstName: '%Alice%' },
+      );
+    });
+
+    it('should filter by lastName', async () => {
+      const queryBuilder = mockRepository.createQueryBuilder();
+      queryBuilder.getMany.mockResolvedValue([mockUsers[1]]);
+
+      await service.findAllCursorPaginated(
+        undefined,
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        { lastName: 'Brown' },
+      );
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        'LOWER(user.lastName) LIKE LOWER(:lastName)',
+        { lastName: '%Brown%' },
+      );
+    });
+
+    it('should filter by email', async () => {
+      const queryBuilder = mockRepository.createQueryBuilder();
+      queryBuilder.getMany.mockResolvedValue([mockUsers[0]]);
+
+      await service.findAllCursorPaginated(
+        undefined,
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        { email: 'alice' },
+      );
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        'LOWER(user.email) LIKE LOWER(:email)',
+        { email: '%alice%' },
+      );
+    });
+
+    it('should apply multiple filters', async () => {
+      const queryBuilder = mockRepository.createQueryBuilder();
+      queryBuilder.getMany.mockResolvedValue([mockUsers[0]]);
+
+      await service.findAllCursorPaginated(
+        undefined,
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        { firstName: 'Alice', lastName: 'Anderson', email: 'example' },
+      );
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledTimes(3);
+    });
+
+    it('should combine filters with cursor pagination', async () => {
+      const cursorUser = mockUsers[0];
+      mockRepository.findOne.mockResolvedValue(cursorUser);
+      const queryBuilder = mockRepository.createQueryBuilder();
+      queryBuilder.getMany.mockResolvedValue([mockUsers[1]]);
+
+      await service.findAllCursorPaginated(
+        '1',
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        { firstName: 'Bob' },
+      );
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        'LOWER(user.firstName) LIKE LOWER(:firstName)',
+        { firstName: '%Bob%' },
+      );
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining('user.createdAt'),
+        expect.any(Object),
+      );
+    });
   });
 
   describe('create', () => {
-    it('should create a user', async () => {
+    it('should create a user with default USER role', async () => {
       const createUserDto = {
         firstName: 'Test',
         lastName: 'User',
@@ -314,7 +413,11 @@ describe('UsersService', () => {
         birthdate: '1990-01-01',
       };
 
-      const savedUser = { ...mockUsers[0], ...createUserDto };
+      const savedUser = {
+        ...mockUsers[0],
+        ...createUserDto,
+        role: Role.USER,
+      };
       mockRepository.create.mockReturnValue(savedUser);
       mockRepository.save.mockResolvedValue(savedUser);
 
@@ -323,6 +426,108 @@ describe('UsersService', () => {
       expect(mockRepository.create).toHaveBeenCalled();
       expect(mockRepository.save).toHaveBeenCalled();
       expect(result).toEqual(savedUser);
+      expect(result.role).toBe(Role.USER);
+    });
+
+    it('should create a user with specified role', async () => {
+      const createUserDto = {
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@example.com',
+        password: 'password123',
+        birthdate: '1990-01-01',
+        role: Role.ADMIN,
+      };
+
+      const savedUser = {
+        ...mockUsers[0],
+        ...createUserDto,
+        role: Role.ADMIN,
+      };
+      mockRepository.create.mockReturnValue(savedUser);
+      mockRepository.save.mockResolvedValue(savedUser);
+
+      const result = await service.create(createUserDto);
+
+      expect(result.role).toBe(Role.ADMIN);
+    });
+  });
+
+  describe('update', () => {
+    it('should update a user and return the updated user', async () => {
+      const updateUserDto = {
+        firstName: 'Updated',
+        lastName: 'Name',
+      };
+      const updatedUser = { ...mockUsers[0], ...updateUserDto };
+
+      mockRepository.findOne
+        .mockResolvedValueOnce(mockUsers[0]) // First call for checking existence
+        .mockResolvedValueOnce(updatedUser); // Second call after update
+
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+
+      const result = await service.update('1', updateUserDto);
+
+      expect(mockRepository.update).toHaveBeenCalledWith('1', {
+        ...updateUserDto,
+      });
+      expect(result).toEqual(updatedUser);
+    });
+
+    it('should throw NotFoundException when user does not exist', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.update('nonexistent', { firstName: 'Test' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should handle birthdate conversion', async () => {
+      const updateUserDto = {
+        birthdate: '1995-05-15',
+      };
+      const updatedUser = {
+        ...mockUsers[0],
+        birthdate: new Date('1995-05-15'),
+      };
+
+      mockRepository.findOne
+        .mockResolvedValueOnce(mockUsers[0])
+        .mockResolvedValueOnce(updatedUser);
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+
+      await service.update('1', updateUserDto);
+
+      expect(mockRepository.update).toHaveBeenCalledWith('1', {
+        birthdate: new Date('1995-05-15'),
+      });
+    });
+  });
+
+  describe('updateRole', () => {
+    it('should update user role', async () => {
+      const updatedUser = { ...mockUsers[0], role: Role.ADMIN };
+
+      mockRepository.findOne
+        .mockResolvedValueOnce(mockUsers[0])
+        .mockResolvedValueOnce(updatedUser);
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+
+      const result = await service.updateRole('1', Role.ADMIN);
+
+      expect(mockRepository.update).toHaveBeenCalledWith('1', {
+        role: Role.ADMIN,
+      });
+      expect(result).toEqual(updatedUser);
+    });
+
+    it('should return null when user does not exist', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.updateRole('nonexistent', Role.ADMIN);
+
+      expect(result).toBeNull();
     });
   });
 
