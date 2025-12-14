@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateSelfDto } from './dto/update-self.dto';
 import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto';
 import { SortField, SortOrder } from './dto/cursor-pagination.dto';
 import { User } from './entities/user.entity';
@@ -85,10 +86,10 @@ export class UsersService {
     return await this.userRepository.findOne({ where: { email } });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
+  async update(id: string, updateUserDto: UpdateUserDto | UpdateSelfDto): Promise<User> {
     const user = await this.findOne(id);
     if (!user) {
-      return null;
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
 
     const updatedData = {
@@ -99,7 +100,11 @@ export class UsersService {
     };
 
     await this.userRepository.update(id, updatedData);
-    return await this.findOne(id);
+    const updatedUser = await this.findOne(id);
+    if (!updatedUser) {
+      throw new NotFoundException(`User with ID ${id} not found after update`);
+    }
+    return updatedUser;
   }
 
   async remove(id: string): Promise<boolean> {

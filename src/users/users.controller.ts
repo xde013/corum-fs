@@ -24,6 +24,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateSelfDto } from './dto/update-self.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { BulkDeleteUsersDto } from './dto/bulk-delete-users.dto';
 import { CursorPaginationDto } from './dto/cursor-pagination.dto';
@@ -31,6 +32,7 @@ import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto'
 import { User } from './entities/user.entity';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Role } from './enums/role.enum';
 
 @ApiTags('users')
@@ -65,7 +67,8 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({
-    summary: 'Get all users with cursor-based pagination and sorting (Admin only)',
+    summary:
+      'Get all users with cursor-based pagination and sorting (Admin only)',
     description:
       'Efficient pagination for large datasets. Use nextCursor from response for subsequent requests. Supports sorting by multiple fields.',
   })
@@ -162,8 +165,29 @@ export class UsersController {
     );
   }
 
+  @Get('me')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returns the current user.',
+    type: User,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  getMe(@CurrentUser() user: User): User {
+    return user;
+  }
+
   @Get(':id')
-  @ApiOperation({ summary: 'Get a user by ID' })
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({
+    summary: 'Get a user by ID',
+    description:
+      'Users can only view their own profile. Admins can view any user.',
+  })
   @ApiParam({
     name: 'id',
     description: 'User UUID',
@@ -183,6 +207,10 @@ export class UsersController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Unauthorized - Invalid or missing JWT token',
   })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Forbidden - You can only view your own profile',
+  })
   async findOne(@Param('id') id: string): Promise<User> {
     const user = await this.usersService.findOne(id);
     if (!user) {
@@ -191,10 +219,36 @@ export class UsersController {
     return user;
   }
 
+  @Patch('me')
+  @ApiOperation({
+    summary: 'Update current user profile',
+    description:
+      'Users can update their own firstName, lastName, and birthdate',
+  })
+  @ApiBody({ type: UpdateSelfDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'The user has been successfully updated.',
+    type: User,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  async updateMe(
+    @CurrentUser() currentUser: User,
+    @Body() updateSelfDto: UpdateSelfDto,
+  ): Promise<User> {
+    return await this.usersService.update(currentUser.id, updateSelfDto);
+  }
+
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Update a user (Admin only)' })
+  @ApiOperation({
+    summary: 'Update a user',
+    description: 'Admins can update any user field.',
+  })
   @ApiParam({
     name: 'id',
     description: 'User UUID',
@@ -215,10 +269,6 @@ export class UsersController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Unauthorized - Invalid or missing JWT token',
   })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'Forbidden - Admin role required',
-  })
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -230,10 +280,33 @@ export class UsersController {
     return user;
   }
 
+  @Delete('me')
+  @ApiOperation({ summary: 'Delete current user account' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Your account has been successfully deleted.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  async deleteMe(
+    @CurrentUser() currentUser: User,
+  ): Promise<{ message: string }> {
+    const deleted = await this.usersService.remove(currentUser.id);
+    if (!deleted) {
+      throw new NotFoundException('User not found');
+    }
+    return { message: 'Your account has been deleted' };
+  }
+
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Delete a user (Admin only)' })
+  @ApiOperation({
+    summary: 'Delete a user (Admin only)',
+    description: 'Admins can delete any user.',
+  })
   @ApiParam({
     name: 'id',
     description: 'User UUID',
@@ -254,7 +327,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: HttpStatus.FORBIDDEN,
-    description: 'Forbidden - Admin role required',
+    description: 'Forbidden - You can only delete your own account',
   })
   async remove(@Param('id') id: string): Promise<{ message: string }> {
     const deleted = await this.usersService.remove(id);
