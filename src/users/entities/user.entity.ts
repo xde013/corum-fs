@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
+import { Role } from '../enums/role.enum';
 
 @Entity('users')
 export class User {
@@ -52,6 +53,19 @@ export class User {
   })
   @Column({ type: 'date' })
   birthdate: Date;
+
+  @ApiProperty({
+    example: 'user',
+    description: 'The role of the user',
+    enum: Role,
+    default: Role.USER,
+  })
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  role: Role;
 
   @ApiProperty({
     example: '2024-01-01T00:00:00.000Z',

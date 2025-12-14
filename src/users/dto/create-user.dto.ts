@@ -5,7 +5,10 @@ import {
   IsNotEmpty,
   MinLength,
   IsDateString,
+  IsEnum,
+  IsOptional,
 } from 'class-validator';
+import { Role } from '../enums/role.enum';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -51,4 +54,15 @@ export class CreateUserDto {
   @IsDateString()
   @IsNotEmpty()
   birthdate: string;
+
+  @ApiProperty({
+    example: 'user',
+    description: 'The role of the user',
+    enum: Role,
+    default: Role.USER,
+    required: false,
+  })
+  @IsEnum(Role)
+  @IsOptional()
+  role?: Role;
 }

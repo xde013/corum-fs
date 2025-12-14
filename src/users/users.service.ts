@@ -6,6 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto';
 import { SortField, SortOrder } from './dto/cursor-pagination.dto';
 import { User } from './entities/user.entity';
+import { Role } from './enums/role.enum';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +19,7 @@ export class UsersService {
     const user = this.userRepository.create({
       ...createUserDto,
       birthdate: new Date(createUserDto.birthdate),
+      role: createUserDto.role || Role.USER,
     });
     return await this.userRepository.save(user);
   }
@@ -130,5 +132,15 @@ export class UsersService {
       deleted: deletedCount,
       failed,
     };
+  }
+
+  async updateRole(id: string, role: Role): Promise<User | null> {
+    const user = await this.findOne(id);
+    if (!user) {
+      return null;
+    }
+
+    await this.userRepository.update(id, { role });
+    return await this.findOne(id);
   }
 }

@@ -12,6 +12,7 @@ import { RegisterDto } from './dto/register.dto';
 import { AuthResponse } from './interfaces/auth-response.interface';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { User } from '../users/entities/user.entity';
+import { Role } from '../users/enums/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -38,6 +39,7 @@ export class AuthService {
     const user = await this.usersService.create({
       ...registerDto,
       password: hashedPassword,
+      role: Role.USER, // Explicitly set to USER to prevent privilege escalation
     });
 
     // Generate tokens

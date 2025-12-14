@@ -17,6 +17,7 @@ import * as fs from 'fs';
           type: 'postgres',
           url: configService.get<string>('DATABASE_URL'),
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+          migrations: [__dirname + '/../../migrations/*{.ts,.js}'],
           synchronize: !isProduction,
           logging: !isProduction,
           ssl: {
