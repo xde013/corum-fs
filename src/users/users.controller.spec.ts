@@ -292,7 +292,12 @@ describe('UsersController', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { firstName: 'Alice', lastName: undefined, email: undefined },
+        {
+          search: undefined,
+          firstName: 'Alice',
+          lastName: undefined,
+          email: undefined,
+        },
       );
     });
 
@@ -311,7 +316,12 @@ describe('UsersController', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { firstName: undefined, lastName: 'Brown', email: undefined },
+        {
+          search: undefined,
+          firstName: undefined,
+          lastName: 'Brown',
+          email: undefined,
+        },
       );
     });
 
@@ -330,7 +340,12 @@ describe('UsersController', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { firstName: undefined, lastName: undefined, email: 'example.com' },
+        {
+          search: undefined,
+          firstName: undefined,
+          lastName: undefined,
+          email: 'example.com',
+        },
       );
     });
 
@@ -351,7 +366,12 @@ describe('UsersController', () => {
         10,
         SortField.CREATED_AT,
         SortOrder.DESC,
-        { firstName: 'John', lastName: 'Doe', email: 'gmail' },
+        {
+          search: undefined,
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'gmail',
+        },
       );
     });
 
@@ -370,6 +390,82 @@ describe('UsersController', () => {
         SortField.CREATED_AT,
         SortOrder.DESC,
         undefined,
+      );
+    });
+
+    it('should pass search parameter to service', async () => {
+      const queryDto: UserListQueryDto = {
+        limit: 10,
+        sortBy: SortField.CREATED_AT,
+        sortOrder: SortOrder.DESC,
+        search: 'john',
+      };
+
+      await controller.findAll(queryDto);
+
+      expect(service.findAllCursorPaginated).toHaveBeenCalledWith(
+        undefined,
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        {
+          search: 'john',
+          firstName: undefined,
+          lastName: undefined,
+          email: undefined,
+        },
+      );
+    });
+
+    it('should pass search parameter with other filters to service', async () => {
+      const queryDto: UserListQueryDto = {
+        limit: 10,
+        sortBy: SortField.CREATED_AT,
+        sortOrder: SortOrder.DESC,
+        search: 'alice',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'test',
+      };
+
+      await controller.findAll(queryDto);
+
+      expect(service.findAllCursorPaginated).toHaveBeenCalledWith(
+        undefined,
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        {
+          search: 'alice',
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'test',
+        },
+      );
+    });
+
+    it('should pass search parameter with cursor to service', async () => {
+      const queryDto: UserListQueryDto = {
+        cursor: 'cursor-123',
+        limit: 10,
+        sortBy: SortField.CREATED_AT,
+        sortOrder: SortOrder.DESC,
+        search: 'bob',
+      };
+
+      await controller.findAll(queryDto);
+
+      expect(service.findAllCursorPaginated).toHaveBeenCalledWith(
+        'cursor-123',
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        {
+          search: 'bob',
+          firstName: undefined,
+          lastName: undefined,
+          email: undefined,
+        },
       );
     });
   });

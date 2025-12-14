@@ -70,7 +70,7 @@ export class UsersController {
     summary:
       'Get all users with cursor-based pagination, sorting, and filtering (Admin only)',
     description:
-      'Efficient pagination for large datasets. Use nextCursor from response for subsequent requests. Supports sorting by multiple fields and filtering by firstName, lastName, and email.',
+      'Efficient pagination for large datasets. Use nextCursor from response for subsequent requests. Supports sorting by multiple fields, unified search across email/firstName/lastName, and individual filtering by firstName, lastName, and email.',
   })
   @ApiQuery({
     name: 'cursor',
@@ -128,6 +128,13 @@ export class UsersController {
     description: 'Filter by email (partial match, case-insensitive)',
     example: 'example.com',
   })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search across email, first name, and last name (partial match, case-insensitive). If provided, individual filters (firstName, lastName, email) are ignored.',
+    example: 'john',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returns cursor-paginated users.',
@@ -179,8 +186,12 @@ export class UsersController {
     @Query() queryDto: UserListQueryDto,
   ): Promise<CursorPaginatedResponseDto<User>> {
     const filters =
-      queryDto.firstName || queryDto.lastName || queryDto.email
+      queryDto.search ||
+      queryDto.firstName ||
+      queryDto.lastName ||
+      queryDto.email
         ? {
+            search: queryDto.search,
             firstName: queryDto.firstName,
             lastName: queryDto.lastName,
             email: queryDto.email,

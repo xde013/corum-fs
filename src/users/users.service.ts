@@ -48,20 +48,34 @@ export class UsersService {
 
     // Apply filters
     if (filters) {
-      if (filters.firstName) {
-        queryBuilder.andWhere('LOWER(user.firstName) LIKE LOWER(:firstName)', {
-          firstName: `%${filters.firstName}%`,
-        });
-      }
-      if (filters.lastName) {
-        queryBuilder.andWhere('LOWER(user.lastName) LIKE LOWER(:lastName)', {
-          lastName: `%${filters.lastName}%`,
-        });
-      }
-      if (filters.email) {
-        queryBuilder.andWhere('LOWER(user.email) LIKE LOWER(:email)', {
-          email: `%${filters.email}%`,
-        });
+      // Unified search across email, firstName, and lastName
+      if (filters.search) {
+        queryBuilder.andWhere(
+          '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search))',
+          {
+            search: `%${filters.search}%`,
+          },
+        );
+      } else {
+        // Individual filters (only apply if search is not provided)
+        if (filters.firstName) {
+          queryBuilder.andWhere(
+            'LOWER(user.firstName) LIKE LOWER(:firstName)',
+            {
+              firstName: `%${filters.firstName}%`,
+            },
+          );
+        }
+        if (filters.lastName) {
+          queryBuilder.andWhere('LOWER(user.lastName) LIKE LOWER(:lastName)', {
+            lastName: `%${filters.lastName}%`,
+          });
+        }
+        if (filters.email) {
+          queryBuilder.andWhere('LOWER(user.email) LIKE LOWER(:email)', {
+            email: `%${filters.email}%`,
+          });
+        }
       }
     }
 

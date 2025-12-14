@@ -3,6 +3,15 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class UserFiltersDto {
   @ApiProperty({
+    description: 'Search across email, first name, and last name (partial match, case-insensitive)',
+    required: false,
+    example: 'john',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiProperty({
     description: 'Filter by first name (partial match, case-insensitive)',
     required: false,
     example: 'John',

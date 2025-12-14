@@ -401,6 +401,91 @@ describe('UsersService', () => {
         expect.any(Object),
       );
     });
+
+    it('should search across email, firstName, and lastName when search parameter is provided', async () => {
+      const queryBuilder = mockRepository.createQueryBuilder();
+      queryBuilder.getMany.mockResolvedValue([mockUsers[0]]);
+
+      await service.findAllCursorPaginated(
+        undefined,
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        { search: 'alice' },
+      );
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search))',
+        { search: '%alice%' },
+      );
+    });
+
+    it('should ignore individual filters when search parameter is provided', async () => {
+      const queryBuilder = mockRepository.createQueryBuilder();
+      queryBuilder.getMany.mockResolvedValue([mockUsers[0]]);
+
+      await service.findAllCursorPaginated(
+        undefined,
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        {
+          search: 'alice',
+          firstName: 'Bob',
+          lastName: 'Brown',
+          email: 'test',
+        },
+      );
+
+      // Should only call andWhere once with the search query
+      expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search))',
+        { search: '%alice%' },
+      );
+    });
+
+    it('should combine search with cursor pagination', async () => {
+      const cursorUser = mockUsers[0];
+      mockRepository.findOne.mockResolvedValue(cursorUser);
+      const queryBuilder = mockRepository.createQueryBuilder();
+      queryBuilder.getMany.mockResolvedValue([mockUsers[1]]);
+
+      await service.findAllCursorPaginated(
+        '1',
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        { search: 'bob' },
+      );
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search))',
+        { search: '%bob%' },
+      );
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining('user.createdAt'),
+        expect.any(Object),
+      );
+    });
+
+    it('should handle case-insensitive search', async () => {
+      const queryBuilder = mockRepository.createQueryBuilder();
+      queryBuilder.getMany.mockResolvedValue([mockUsers[0]]);
+
+      await service.findAllCursorPaginated(
+        undefined,
+        10,
+        SortField.CREATED_AT,
+        SortOrder.DESC,
+        { search: 'ALICE' },
+      );
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search))',
+        { search: '%ALICE%' },
+      );
+    });
   });
 
   describe('create', () => {
