@@ -1,6 +1,4 @@
-import { render } from '@/shared/utils/testUtils';
-// @ts-expect-error - screen is exported via export * from testUtils
-import { screen } from '@/shared/utils/testUtils';
+import { render, screen } from '@/shared/utils/testUtils';
 import { NameFields } from './NameFields';
 import { useForm } from 'react-hook-form';
 import { describe, it, expect } from 'vitest';

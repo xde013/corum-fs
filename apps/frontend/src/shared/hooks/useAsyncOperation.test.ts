@@ -17,7 +17,7 @@ describe('useAsyncOperation', () => {
 
   it('should set loading to true during operation', async () => {
     const mockOperation = vi.fn(
-      () => new Promise((resolve) => setTimeout(() => resolve('success'), 100))
+      (_arg: string) => new Promise((resolve) => setTimeout(() => resolve('success'), 100))
     );
     const { result } = renderHook(() => useAsyncOperation(mockOperation));
 
