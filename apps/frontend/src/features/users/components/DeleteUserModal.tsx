@@ -47,7 +47,7 @@ export const DeleteUserModal = ({
             isLoading={isLoading}
             disabled={isLoading}
           >
-            Delete User
+            Delete
           </Button>
         </div>
       </div>

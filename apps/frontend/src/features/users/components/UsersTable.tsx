@@ -12,6 +12,9 @@ interface UsersTableProps {
   onRowClick?: (user: User) => void;
   onEdit?: (user: User) => void;
   onDelete?: (user: User) => void;
+  selectedUserIds?: string[];
+  onToggleUserSelection?: (userId: string) => void;
+  onToggleAllSelection?: (userIds: string[]) => void;
   isLoading?: boolean;
   sortBy?: SortField;
   sortOrder?: SortOrder;
@@ -23,6 +26,9 @@ export const UsersTable = ({
   onRowClick,
   onEdit,
   onDelete,
+  selectedUserIds = [],
+  onToggleUserSelection,
+  onToggleAllSelection,
   isLoading = false,
   sortBy,
   sortOrder,
@@ -52,6 +58,53 @@ export const UsersTable = ({
   };
 
   const columns: ColumnDef<User>[] = [
+    {
+      id: 'select',
+      header: () => {
+        const allIds = data.map((user) => user.id);
+        const allSelected =
+          allIds.length > 0 && allIds.every((id) => selectedUserIds.includes(id));
+        const someSelected =
+          allIds.length > 0 &&
+          selectedUserIds.length > 0 &&
+          !allSelected;
+
+        return (
+          <input
+            type="checkbox"
+            aria-label="Select all users"
+            checked={allSelected}
+            ref={(el) => {
+              if (!el) return;
+              el.indeterminate = someSelected;
+            }}
+            onChange={() => {
+              if (!onToggleAllSelection) return;
+              onToggleAllSelection(allIds);
+            }}
+            className="h-5 w-5 text-blue-800 border-gray-300 rounded cursor-pointer"
+          />
+        );
+      },
+      cell: (info) => {
+        const user = info.row.original;
+        const isSelected = selectedUserIds.includes(user.id);
+        return (
+          <input
+            type="checkbox"
+            aria-label={`Select user ${user.firstName} ${user.lastName}`}
+            checked={isSelected}
+            onChange={(e) => {
+              e.stopPropagation();
+              onToggleUserSelection?.(user.id);
+            }}
+            className="h-5 w-5 bg-blue-800 border-gray-300 rounded cursor-pointer"
+            onClick={(e) => e.stopPropagation()}
+          />
+        );
+      },
+      enableSorting: false,
+    },
     {
       accessorKey: 'firstName',
       header: 'First Name',
@@ -219,13 +272,18 @@ export const UsersTable = ({
             >
               {row.getVisibleCells().map((cell) => {
                 const isActionsCell = cell.column.id === 'actions';
+                const isSelectCell = cell.column.id === 'select';
                 return (
                   <td
                     key={cell.id}
                     className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${
                       isActionsCell ? 'text-center' : ''
                     }`}
-                    onClick={isActionsCell ? (e) => e.stopPropagation() : undefined}
+                    onClick={
+                      isActionsCell || isSelectCell
+                        ? (e) => e.stopPropagation()
+                        : undefined
+                    }
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>

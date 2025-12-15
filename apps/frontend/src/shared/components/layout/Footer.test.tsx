@@ -5,8 +5,10 @@ import { Footer } from './Footer';
 describe('Footer', () => {
   it('should render footer with text', () => {
     render(<Footer />);
-    expect(screen.getByText(/Made with ❤️ by/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Ryan' })).toBeInTheDocument();
+    expect(screen.getByText(/Made with ♥ by Ryan/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /Made with ♥ by Ryan/ })
+    ).toBeInTheDocument();
   });
 
   it('should have footer element', () => {
@@ -17,7 +19,7 @@ describe('Footer', () => {
 
   it('should have link to GitHub profile', () => {
     render(<Footer />);
-    const link = screen.getByRole('link', { name: 'Ryan' });
+    const link = screen.getByRole('link', { name: /Made with ♥ by Ryan/ });
     expect(link).toHaveAttribute('href', 'https://github.com/xde013');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');

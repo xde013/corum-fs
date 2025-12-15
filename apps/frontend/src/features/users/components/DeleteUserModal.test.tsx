@@ -34,8 +34,10 @@ describe('DeleteUserModal', () => {
       />
     );
 
-    expect(screen.getByRole('heading', { name: 'Delete User' })).toBeInTheDocument();
-    expect(screen.getByText('Delete User', { selector: 'button' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Delete User' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
   });
 
   it('should display user name in message', () => {
@@ -83,7 +85,7 @@ describe('DeleteUserModal', () => {
       />
     );
 
-    const deleteButton = screen.getByRole('button', { name: 'Delete User' });
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
     await user.click(deleteButton);
 
     expect(mockOnConfirm).toHaveBeenCalledTimes(1);
