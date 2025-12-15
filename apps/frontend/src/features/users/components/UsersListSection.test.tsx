@@ -26,11 +26,9 @@ vi.mock('react-hot-toast', () => ({
   },
 }));
 
-let latestUsersTableProps: any;
 
 vi.mock('./UsersTable', () => ({
   UsersTable: (props: any) => {
-    latestUsersTableProps = props;
     return (
       <div data-testid="users-table">
         <button
@@ -56,11 +54,9 @@ vi.mock('./UsersTable', () => ({
   },
 }));
 
-let latestDeleteUserModalProps: any;
 
 vi.mock('./DeleteUserModal', () => ({
   DeleteUserModal: (props: any) => {
-    latestDeleteUserModalProps = props;
     if (!props.isOpen) return null;
     return (
       <div data-testid="delete-user-modal">
