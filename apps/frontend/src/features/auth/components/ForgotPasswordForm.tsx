@@ -51,7 +51,7 @@ export const ForgotPasswordForm = () => {
     const trimmedEmail = data.email.trim();
     try {
       await onSubmit(trimmedEmail);
-      // Set reset link after successful submission
+      // Development only: Set reset link to the reset password page
       setResetLink(`${window.location.origin}/auth/reset-password?token=${trimmedEmail}`);
       reset();
     } catch {

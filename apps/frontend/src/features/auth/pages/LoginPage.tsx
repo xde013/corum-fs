@@ -14,11 +14,13 @@ export const LoginPage = () => {
   useEffect(() => {
     if (isAuthenticated) {
       const fromPath = (location.state as any)?.from?.pathname;
-      const safePath = validateRedirectPath(fromPath);
+      // Validate the redirect path to prevent open redirect vulnerabilities eg: /auth/login?redirect=https://evil.com
+      const safePath = validateRedirectPath(fromPath); 
       navigate(safePath, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);
 
+  // Show toast message from location state
   useEffect(() => {
     const message = (location.state as any)?.message;
     if (message) {

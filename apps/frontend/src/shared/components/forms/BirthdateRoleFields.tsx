@@ -1,6 +1,6 @@
-import { Control, Controller, UseFormRegister, FieldErrors, FieldValues, Path } from 'react-hook-form';
-import { DatePicker } from './DatePicker';
-import { Select } from './Select';
+import { Control, UseFormRegister, FieldErrors, FieldValues, Path } from 'react-hook-form';
+import { BirthdateField } from './BirthdateField';
+import { RoleField } from './RoleField';
 
 interface BirthdateRoleFieldsProps<T extends FieldValues> {
   control: Control<T>;
@@ -21,31 +21,19 @@ export const BirthdateRoleFields = <T extends FieldValues>({
 }: BirthdateRoleFieldsProps<T>) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Controller
-        name={birthdateField}
+      <BirthdateField
         control={control}
-        render={({ field }) => (
-          <DatePicker
-            label="Birthdate"
-            value={field.value}
-            onChange={field.onChange}
-            error={errors[birthdateField]?.message as string | undefined}
-            disabled={disabled}
-            required
-          />
-        )}
+        errors={errors}
+        birthdateField={birthdateField}
+        disabled={disabled}
       />
 
-      <Select
-        label="Role"
-        error={errors[roleField]?.message as string | undefined}
+      <RoleField
+        register={register}
+        errors={errors}
+        roleField={roleField}
         disabled={disabled}
-        required
-        {...register(roleField)}
-      >
-        <option value="user">User</option>
-        <option value="admin">Admin</option>
-      </Select>
+      />
     </div>
   );
 };

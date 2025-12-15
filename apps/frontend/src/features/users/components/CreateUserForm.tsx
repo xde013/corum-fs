@@ -6,7 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { NameFields } from '@/shared/components/forms/NameFields';
 import { EmailField } from '@/shared/components/forms/EmailField';
 import { PasswordField } from '@/shared/components/forms/PasswordField';
-import { BirthdateRoleFields } from '@/shared/components/forms/BirthdateRoleFields';
+import { BirthdateField } from '@/shared/components/forms/BirthdateField';
+import { RoleField } from '@/shared/components/forms/RoleField';
 
 interface CreateUserFormProps {
   onSubmit: (data: CreateUserFormData) => Promise<void>;
@@ -49,13 +50,19 @@ export const CreateUserForm = ({ onSubmit, isLoading = false }: CreateUserFormPr
         errors={errors}
       />
 
-      <BirthdateRoleFields
-        control={control}
-        register={register}
-        errors={errors}
-        birthdateField="birthdate"
-        roleField="role"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <BirthdateField
+          control={control}
+          errors={errors}
+          birthdateField="birthdate"
+        />
+
+        <RoleField
+          register={register}
+          errors={errors}
+          roleField="role"
+        />
+      </div>
 
       <div className="flex justify-end gap-3 pt-4">
         <Button

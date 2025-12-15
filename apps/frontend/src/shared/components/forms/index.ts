@@ -5,4 +5,6 @@ export { DatePicker } from './DatePicker';
 export { EmailField } from './EmailField';
 export { NameFields } from './NameFields';
 export { PasswordField } from './PasswordField';
+export { BirthdateField } from './BirthdateField';
+export { RoleField } from './RoleField';
 export { BirthdateRoleFields } from './BirthdateRoleFields';

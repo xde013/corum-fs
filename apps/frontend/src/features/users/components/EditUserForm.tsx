@@ -7,7 +7,8 @@ import { format } from 'date-fns/format';
 import { NameFields } from '@/shared/components/forms/NameFields';
 import { EmailField } from '@/shared/components/forms/EmailField';
 import { PasswordField } from '@/shared/components/forms/PasswordField';
-import { BirthdateRoleFields } from '@/shared/components/forms/BirthdateRoleFields';
+import { BirthdateField } from '@/shared/components/forms/BirthdateField';
+import { RoleField } from '@/shared/components/forms/RoleField';
 
 interface EditUserFormProps {
   user: User;
@@ -71,14 +72,21 @@ export const EditUserForm = ({
         />
       )}
 
-      <BirthdateRoleFields
-        control={control}
-        register={register}
-        errors={errors}
-        birthdateField="birthdate"
-        roleField="role"
-        disabled={isReadOnly}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <BirthdateField
+          control={control}
+          errors={errors}
+          birthdateField="birthdate"
+          disabled={isReadOnly}
+        />
+
+        <RoleField
+          register={register}
+          errors={errors}
+          roleField="role"
+          disabled={isReadOnly}
+        />
+      </div>
 
       {!isReadOnly && (
         <div className="flex justify-between items-center pt-4 border-t border-gray-200">
