@@ -8,18 +8,17 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "serve": "turbo run serve",
     "dev:backend": "turbo run dev --filter=backend",
     "dev:frontend": "turbo run dev --filter=frontend",
-    "build:backend": "turbo run build --filter=backend",
-    "build:frontend": "turbo run build --filter=frontend",
+    "serve:frontend": "turbo run serve --filter=frontend",
     "lint": "turbo run lint",
-    "lint:backend": "turbo run lint --filter=backend",
-    "lint:frontend": "turbo run lint --filter=frontend",
     "test": "turbo run test",
     "test:backend": "turbo run test --filter=backend",
     "test:frontend": "turbo run test --filter=frontend",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "setup": "turbo run setup --filter=backend && turbo run serve --filter=frontend"
   },
   "devDependencies": {
     "prettier": "^3.4.2",
