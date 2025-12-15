@@ -24,6 +24,7 @@ export default defineConfig({
   ],
   build: {
     minify: 'terser',
+    target: 'esnext',
     cssCodeSplit: true,
     sourcemap: false,
     chunkSizeWarningLimit: 1000,
@@ -48,12 +49,14 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
+    open: true,
   },
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/shared/__tests__/setupTests.ts'],
     css: true,
+    include: ['src/**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
