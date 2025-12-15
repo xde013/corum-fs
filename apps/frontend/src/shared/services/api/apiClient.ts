@@ -1,4 +1,10 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import {
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+  clearTokens,
+} from '@/shared/utils/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -20,7 +26,8 @@ class ApiClient {
     // Request interceptor - add auth token
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        const token = this.getAccessToken();
+        const token = getAccessToken();
+        // Add the auth token to the request headers if it exists
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -38,7 +45,8 @@ class ApiClient {
         };
 
         if (error.response?.status === 401 && !originalRequest._retry) {
-          originalRequest._retry = true;
+          // Set the retry flag to true to prevent infinite loop
+          originalRequest._retry = true; 
 
           try {
             const newToken = await this.refreshAccessToken();
@@ -47,7 +55,7 @@ class ApiClient {
               return this.client(originalRequest);
             }
           } catch (refreshError) {
-            this.clearTokens();
+            clearTokens();
             window.location.href = '/auth/login';
             return Promise.reject(refreshError);
           }
@@ -58,26 +66,8 @@ class ApiClient {
     );
   }
 
-  private getAccessToken(): string | null {
-    return localStorage.getItem('accessToken');
-  }
-
-  private getRefreshToken(): string | null {
-    return localStorage.getItem('refreshToken');
-  }
-
-  private setTokens(accessToken: string, refreshToken: string): void {
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-  }
-
-  private clearTokens(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-  }
-
   private async refreshAccessToken(): Promise<string | null> {
-    const refreshToken = this.getRefreshToken();
+    const refreshToken = getRefreshToken();
     if (!refreshToken) return null;
 
     try {
@@ -92,7 +82,7 @@ class ApiClient {
         }
       );
       const { accessToken, refreshToken: newRefreshToken } = response.data;
-      this.setTokens(accessToken, newRefreshToken);
+      setTokens(accessToken, newRefreshToken);
       return accessToken;
     } catch {
       return null;
@@ -100,11 +90,11 @@ class ApiClient {
   }
 
   public setAuthTokens(accessToken: string, refreshToken: string): void {
-    this.setTokens(accessToken, refreshToken);
+    setTokens(accessToken, refreshToken);
   }
 
   public clearAuthTokens(): void {
-    this.clearTokens();
+    clearTokens();
   }
 
   public getClient(): AxiosInstance {

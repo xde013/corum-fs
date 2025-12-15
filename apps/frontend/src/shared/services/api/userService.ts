@@ -52,7 +52,6 @@ export const userService = {
     role?: 'user' | 'admin';
   }): Promise<User> {
     const client = apiClient.getClient();
-    // Use register endpoint which returns AuthResponse
     // Register endpoint doesn't accept role, so we register first then update role if needed
     const { role, ...registerData } = data;
     const response = await client.post<{ user: User; accessToken: string; refreshToken: string }>('/auth/register', registerData);

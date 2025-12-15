@@ -99,7 +99,7 @@ export const ProfilePage = () => {
             <Button
               variant="secondary"
               onClick={() => navigate('/auth/forgot-password', { 
-                state: { email: user.email } 
+                state: { email: user.email } // Pass the user's email to the forgot password page
               })}
               className="cursor-pointer"
             >

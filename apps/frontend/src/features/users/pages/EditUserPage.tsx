@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EditUserForm } from '@/features/users/components/EditUserForm';
 import { DeleteUserModal } from '@/features/users/components/DeleteUserModal';
@@ -20,17 +20,18 @@ export const EditUserPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const fetchUserOperation = async (userId: string) => {
+  const fetchUserOperation = useCallback(async (userId: string) => {
     return await userService.getUserById(userId);
-  };
-
-  const { execute: executeFetchUser, isLoading } = useAsyncOperation(fetchUserOperation);
-
-  const updateUserOperation = async (userId: string, updateData: any) => {
+  }, []);
+  const updateUserOperation = useCallback(async (userId: string, updateData: any) => {
     await userService.updateUser(userId, updateData);
     return await userService.getUserById(userId);
-  };
+  }, []);
+  const deleteUserOperation = useCallback(async (userId: string) => {
+    await userService.deleteUser(userId);
+  }, []);
 
+  const { execute: executeFetchUser, isLoading } = useAsyncOperation(fetchUserOperation);
   const { execute: executeUpdateUser } = useAsyncOperation(updateUserOperation);
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export const EditUserPage = () => {
     };
 
     fetchUser();
-  }, [id, navigate, executeFetchUser]);
+  }, [executeFetchUser, id, navigate]);
 
   const updateUserWithData = async (id: string, data: UpdateUserFormData) => {
     const updateData: any = {
@@ -62,10 +63,6 @@ export const EditUserPage = () => {
     }
 
     return await executeUpdateUser(id, updateData);
-  };
-
-  const deleteUserOperation = async (userId: string) => {
-    await userService.deleteUser(userId);
   };
 
   const { submit: handleSubmit, isLoading: isSaving } = useFormSubmission(
