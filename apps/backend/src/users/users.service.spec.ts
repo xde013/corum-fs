@@ -636,4 +636,130 @@ describe('UsersService', () => {
       expect(result).toBeNull();
     });
   });
+
+  describe('findAll', () => {
+    it('should return all users from the repository', async () => {
+      mockRepository.find.mockResolvedValue(mockUsers);
+
+      const result = await service.findAll();
+
+      expect(mockRepository.find).toHaveBeenCalled();
+      expect(result).toEqual(mockUsers);
+    });
+  });
+
+  describe('findByEmail', () => {
+    it('should return user when email matches', async () => {
+      mockRepository.findOne.mockResolvedValue(mockUsers[0]);
+
+      const result = await service.findByEmail('alice@example.com');
+
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: { email: 'alice@example.com' },
+      });
+      expect(result).toEqual(mockUsers[0]);
+    });
+
+    it('should return null when no user matches email', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findByEmail('missing@example.com');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('findByResetToken', () => {
+    it('should return user when reset token matches', async () => {
+      mockRepository.findOne.mockResolvedValue(mockUsers[0]);
+
+      const result = await service.findByResetToken('reset-token');
+
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: { passwordResetToken: 'reset-token' },
+      });
+      expect(result).toEqual(mockUsers[0]);
+    });
+
+    it('should return null when no user has the reset token', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findByResetToken('missing-token');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('updatePasswordResetToken', () => {
+    it('should set passwordResetToken and passwordResetExpires', async () => {
+      const expires = new Date();
+
+      await service.updatePasswordResetToken('1', 'token', expires);
+
+      expect(mockRepository.update).toHaveBeenCalledWith('1', {
+        passwordResetToken: 'token',
+        passwordResetExpires: expires,
+      });
+    });
+
+    it('should clear passwordResetToken and passwordResetExpires when null', async () => {
+      await service.updatePasswordResetToken('1', null, null);
+
+      expect(mockRepository.update).toHaveBeenCalledWith('1', {
+        passwordResetToken: undefined,
+        passwordResetExpires: undefined,
+      });
+    });
+  });
+
+  describe('remove', () => {
+    it('should return true when delete affects at least one row', async () => {
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.remove('1');
+
+      expect(mockRepository.delete).toHaveBeenCalledWith('1');
+      expect(result).toBe(true);
+    });
+
+    it('should return false when delete affects no rows', async () => {
+      mockRepository.delete.mockResolvedValue({ affected: 0 });
+
+      const result = await service.remove('missing');
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('bulkRemove', () => {
+    it('should return zero deleted and no failed ids when ids array is empty', async () => {
+      const result = await service.bulkRemove([]);
+
+      expect(mockRepository.delete).not.toHaveBeenCalled();
+      expect(result).toEqual({ deleted: 0, failed: [] });
+    });
+
+    it('should delete all users when repository delete affects all ids', async () => {
+      mockRepository.delete.mockResolvedValue({ affected: 2 });
+
+      const result = await service.bulkRemove(['1', '2']);
+
+      expect(mockRepository.delete).toHaveBeenCalledWith(['1', '2']);
+      expect(result).toEqual({ deleted: 2, failed: [] });
+    });
+
+    it('should populate failed ids when some users remain after delete', async () => {
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockRepository.find.mockResolvedValue([{ id: '2' }]);
+
+      const result = await service.bulkRemove(['1', '2']);
+
+      expect(mockRepository.delete).toHaveBeenCalledWith(['1', '2']);
+      expect(mockRepository.find).toHaveBeenCalledWith({
+        where: [{ id: '1' }, { id: '2' }],
+        select: ['id'],
+      });
+      expect(result).toEqual({ deleted: 1, failed: ['2'] });
+    });
+  });
 });

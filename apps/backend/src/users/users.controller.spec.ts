@@ -6,6 +6,7 @@ import { SortField, SortOrder } from './dto/cursor-pagination.dto';
 import { UserListQueryDto } from './dto/user-list-query.dto';
 import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto';
 import { Role } from './enums/role.enum';
+import { NotFoundException } from '@nestjs/common';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -467,6 +468,165 @@ describe('UsersController', () => {
           email: undefined,
         }
       );
+    });
+  });
+
+  describe('create', () => {
+    it('should call UsersService.create with DTO and return created user', async () => {
+      const createUserDto = {
+        firstName: 'Charlie',
+        lastName: 'Clark',
+        email: 'charlie@example.com',
+        password: 'Password123!',
+        birthdate: '1992-03-03',
+      };
+      const createdUser = { ...mockUsers[0], ...createUserDto };
+      (service.create as jest.Mock).mockResolvedValue(createdUser);
+
+      const result = await controller.create(createUserDto as any);
+
+      expect(service.create).toHaveBeenCalledWith(createUserDto);
+      expect(result).toEqual(createdUser);
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return user when found', async () => {
+      (service.findOne as jest.Mock).mockResolvedValue(mockUsers[0]);
+
+      const result = await controller.findOne('1');
+
+      expect(service.findOne).toHaveBeenCalledWith('1');
+      expect(result).toEqual(mockUsers[0]);
+    });
+
+    it('should throw NotFoundException when user is not found', async () => {
+      (service.findOne as jest.Mock).mockResolvedValue(null);
+
+      await expect(controller.findOne('missing')).rejects.toThrow(
+        NotFoundException
+      );
+    });
+  });
+
+  describe('update', () => {
+    it('should return updated user when service returns a user', async () => {
+      const updateUserDto = { firstName: 'Updated' };
+      const updatedUser = { ...mockUsers[0], ...updateUserDto };
+      (service.update as jest.Mock).mockResolvedValue(updatedUser);
+
+      const result = await controller.update('1', updateUserDto as any);
+
+      expect(service.update).toHaveBeenCalledWith('1', updateUserDto);
+      expect(result).toEqual(updatedUser);
+    });
+
+    it('should throw NotFoundException when service returns null', async () => {
+      const updateUserDto = { firstName: 'Updated' };
+      (service.update as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        controller.update('missing', updateUserDto as any)
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('updateMe', () => {
+    it('should call update with current user id and dto', async () => {
+      const currentUser = mockUsers[0];
+      const updateSelfDto = { firstName: 'SelfUpdated' };
+      const updatedUser = { ...currentUser, ...updateSelfDto };
+      (service.update as jest.Mock).mockResolvedValue(updatedUser);
+
+      const result = await controller.updateMe(
+        currentUser,
+        updateSelfDto as any
+      );
+
+      expect(service.update).toHaveBeenCalledWith(
+        currentUser.id,
+        updateSelfDto
+      );
+      expect(result).toEqual(updatedUser);
+    });
+  });
+
+  describe('deleteMe', () => {
+    it('should return success message when user is deleted', async () => {
+      const currentUser = mockUsers[0];
+      (service.remove as jest.Mock).mockResolvedValue(true);
+
+      const result = await controller.deleteMe(currentUser);
+
+      expect(service.remove).toHaveBeenCalledWith(currentUser.id);
+      expect(result).toEqual({ message: 'Your account has been deleted' });
+    });
+
+    it('should throw NotFoundException when user is not found', async () => {
+      const currentUser = mockUsers[0];
+      (service.remove as jest.Mock).mockResolvedValue(false);
+
+      await expect(controller.deleteMe(currentUser)).rejects.toThrow(
+        NotFoundException
+      );
+    });
+  });
+
+  describe('remove', () => {
+    it('should return success message when user is deleted', async () => {
+      (service.remove as jest.Mock).mockResolvedValue(true);
+
+      const result = await controller.remove('1');
+
+      expect(service.remove).toHaveBeenCalledWith('1');
+      expect(result).toEqual({ message: 'User with ID 1 has been deleted' });
+    });
+
+    it('should throw NotFoundException when user is not found', async () => {
+      (service.remove as jest.Mock).mockResolvedValue(false);
+
+      await expect(controller.remove('missing')).rejects.toThrow(
+        NotFoundException
+      );
+    });
+  });
+
+  describe('bulkRemove', () => {
+    it('should delegate to UsersService.bulkRemove and wrap message', async () => {
+      (service.bulkRemove as jest.Mock).mockResolvedValue({
+        deleted: 2,
+        failed: ['3'],
+      });
+
+      const dto = { ids: ['1', '2', '3'] };
+      const result = await controller.bulkRemove(dto as any);
+
+      expect(service.bulkRemove).toHaveBeenCalledWith(dto.ids);
+      expect(result).toEqual({
+        deleted: 2,
+        failed: ['3'],
+        message: 'Successfully deleted 2 user(s)',
+      });
+    });
+  });
+
+  describe('updateRole', () => {
+    it('should return updated user when service returns a user', async () => {
+      const updatedUser = { ...mockUsers[0], role: Role.ADMIN };
+      (service.updateRole as jest.Mock).mockResolvedValue(updatedUser);
+
+      const result = await controller.updateRole('1', { role: Role.ADMIN });
+
+      expect(service.updateRole).toHaveBeenCalledWith('1', Role.ADMIN);
+      expect(result).toEqual(updatedUser);
+    });
+
+    it('should throw NotFoundException when service returns null', async () => {
+      (service.updateRole as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        controller.updateRole('missing', { role: Role.ADMIN })
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

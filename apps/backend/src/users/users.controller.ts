@@ -208,21 +208,6 @@ export class UsersController {
     );
   }
 
-  @Get('me')
-  @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Returns the current user.',
-    type: User,
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Unauthorized - Invalid or missing JWT token',
-  })
-  getMe(@CurrentUser() user: User): User {
-    return user;
-  }
-
   @Get(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)

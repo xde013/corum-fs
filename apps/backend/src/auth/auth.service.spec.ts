@@ -1,10 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
+import { Role } from '../users/enums/role.enum';
 
 // Mock bcrypt module
 jest.mock('bcrypt', () => ({
@@ -26,6 +31,7 @@ describe('AuthService', () => {
     lastName: 'User',
     password: 'hashedpassword123',
     birthdate: new Date('1990-01-01'),
+    role: Role.USER,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -39,6 +45,9 @@ describe('AuthService', () => {
           useValue: {
             findByEmail: jest.fn(),
             create: jest.fn(),
+            findByResetToken: jest.fn(),
+            updatePasswordResetToken: jest.fn(),
+            update: jest.fn(),
           },
         },
         {
@@ -57,6 +66,7 @@ describe('AuthService', () => {
                 JWT_REFRESH_SECRET: 'test-refresh-secret-key-min-32-chars-long',
                 JWT_ACCESS_EXPIRATION: '15m',
                 JWT_REFRESH_EXPIRATION: '7d',
+                PASSWORD_RESET_EXPIRY_HOURS: 3,
               };
               return config[key as keyof typeof config];
             }),
@@ -267,6 +277,126 @@ describe('AuthService', () => {
       await expect(service.verifyToken('invalid-token')).rejects.toThrow(
         'Invalid or expired token'
       );
+    });
+  });
+
+  describe('forgotPassword', () => {
+    const forgotPasswordDto = { email: 'test@example.com' };
+
+    it('should be a no-op (return generic message) when user does not exist', async () => {
+      jest.spyOn(usersService, 'findByEmail').mockResolvedValue(null);
+
+      const result = await service.forgotPassword(forgotPasswordDto);
+
+      expect(usersService.findByEmail).toHaveBeenCalledWith(
+        forgotPasswordDto.email
+      );
+      // Should not attempt to update reset token when user is missing
+      expect(usersService.updatePasswordResetToken).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        message:
+          'If an account with that email exists, a password reset link has been sent.',
+      });
+    });
+
+    it('should set reset token and expiry when user exists', async () => {
+      jest.spyOn(usersService, 'findByEmail').mockResolvedValue(mockUser);
+
+      const getSpy = jest.spyOn(
+        (service as any)['configService'],
+        'get'
+      ) as jest.SpyInstance;
+
+      await service.forgotPassword(forgotPasswordDto);
+
+      expect(usersService.findByEmail).toHaveBeenCalledWith(
+        forgotPasswordDto.email
+      );
+
+      // Verify expiry hours were read from config
+      expect(getSpy).toHaveBeenCalledWith(
+        'PASSWORD_RESET_EXPIRY_HOURS',
+        expect.any(Number)
+      );
+
+      expect(usersService.updatePasswordResetToken).toHaveBeenCalledWith(
+        mockUser.id,
+        // In dev, token equals email
+        mockUser.email,
+        expect.any(Date)
+      );
+
+      const [, , expiry] = (usersService.updatePasswordResetToken as jest.Mock)
+        .mock.calls[0];
+      expect(expiry).toBeInstanceOf(Date);
+      expect(Number.isNaN(expiry.getTime())).toBe(false);
+    });
+  });
+
+  describe('resetPassword', () => {
+    const resetPasswordDto = {
+      token: 'reset-token',
+      newPassword: 'NewPassword123!',
+    };
+
+    it('should throw BadRequestException when token is invalid', async () => {
+      jest.spyOn(usersService, 'findByResetToken').mockResolvedValue(null);
+
+      await expect(service.resetPassword(resetPasswordDto)).rejects.toThrow(
+        BadRequestException
+      );
+      await expect(service.resetPassword(resetPasswordDto)).rejects.toThrow(
+        'Invalid or expired reset token'
+      );
+    });
+
+    it('should throw BadRequestException when token is expired', async () => {
+      const expiredUser: User = {
+        ...mockUser,
+        passwordResetToken: resetPasswordDto.token,
+        passwordResetExpires: new Date(Date.now() - 1000), // in the past
+      };
+      jest
+        .spyOn(usersService, 'findByResetToken')
+        .mockResolvedValue(expiredUser);
+
+      await expect(service.resetPassword(resetPasswordDto)).rejects.toThrow(
+        BadRequestException
+      );
+      await expect(service.resetPassword(resetPasswordDto)).rejects.toThrow(
+        'Reset token has expired'
+      );
+
+      // Expired token should be cleared
+      expect(usersService.updatePasswordResetToken).toHaveBeenCalledWith(
+        expiredUser.id,
+        null,
+        null
+      );
+    });
+
+    it('should update password and clear reset token when token is valid', async () => {
+      const validUser: User = {
+        ...mockUser,
+        passwordResetToken: resetPasswordDto.token,
+        passwordResetExpires: new Date(Date.now() + 60 * 60 * 1000),
+      };
+      jest.spyOn(usersService, 'findByResetToken').mockResolvedValue(validUser);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hashed-password');
+
+      const result = await service.resetPassword(resetPasswordDto);
+
+      expect(usersService.updatePasswordResetToken).toHaveBeenCalledWith(
+        validUser.id,
+        null,
+        null
+      );
+      expect(usersService.update).toHaveBeenCalledWith(validUser.id, {
+        password: 'new-hashed-password',
+      } as any);
+      expect(result).toEqual({
+        message: 'Password has been successfully reset',
+      });
     });
   });
 
