@@ -1,6 +1,6 @@
 # Corum FS
 
-Application full-stack moderne construite avec un monorepo utilisant Turborepo.
+Application full-stack pour gestion utilisateurs (CRUD)
 
 ## Stack Technique
 
