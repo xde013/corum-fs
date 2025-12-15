@@ -104,8 +104,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
                 onSelect={handleDateSelect}
                 disabled={(date) => disabled || isDateDisabled(date)}
                 captionLayout="dropdown"
-                fromYear={1900}
-                toYear={new Date().getFullYear()}
+                startMonth={new Date(1900, 0)}
               />
             </div>
           )}
