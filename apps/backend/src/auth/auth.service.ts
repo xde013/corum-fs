@@ -4,11 +4,15 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import type { JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 // import { randomBytes } from 'crypto';
 import { UsersService } from '../users/users.service';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -28,6 +32,8 @@ export class AuthService {
 
   constructor(
     private usersService: UsersService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private jwtService: JwtService,
     private configService: ConfigService
   ) {}
@@ -44,11 +50,13 @@ export class AuthService {
     const hashedPassword = await this.hashPassword(registerDto.password);
 
     // Create user
-    const user = await this.usersService.create({
+    const user = this.userRepository.create({
       ...registerDto,
       password: hashedPassword,
+      birthdate: new Date(registerDto.birthdate),
       role: Role.USER, // Explicitly set to USER to prevent privilege escalation
     });
+    await this.userRepository.save(user);
 
     // Generate tokens
     const { accessToken, refreshToken } = await this.generateTokens(user);
@@ -124,17 +132,24 @@ export class AuthService {
       throw new Error('JWT secrets are not configured');
     }
 
+    const accessTokenExpiration =
+      this.configService.get<string>('JWT_ACCESS_EXPIRATION') || '15m';
+    const refreshTokenExpiration =
+      this.configService.get<string>('JWT_REFRESH_EXPIRATION') || '7d';
+
+    const accessTokenOptions: JwtSignOptions = {
+      secret: jwtSecret,
+      expiresIn: accessTokenExpiration as string,
+    } as JwtSignOptions;
+
+    const refreshTokenOptions: JwtSignOptions = {
+      secret: jwtRefreshSecret,
+      expiresIn: refreshTokenExpiration as string,
+    } as JwtSignOptions;
+
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: jwtSecret,
-        expiresIn:
-          this.configService.get<string>('JWT_ACCESS_EXPIRATION') || '15m',
-      } as any),
-      this.jwtService.signAsync(payload, {
-        secret: jwtRefreshSecret,
-        expiresIn:
-          this.configService.get<string>('JWT_REFRESH_EXPIRATION') || '7d',
-      } as any),
+      this.jwtService.signAsync(payload, accessTokenOptions),
+      this.jwtService.signAsync(payload, refreshTokenOptions),
     ]);
 
     return {
@@ -231,7 +246,7 @@ export class AuthService {
     await this.usersService.updatePasswordResetToken(user.id, null, null);
     await this.usersService.update(user.id, {
       password: hashedPassword,
-    } as any);
+    } as UpdateUserDto);
 
     return {
       message: 'Password has been successfully reset',

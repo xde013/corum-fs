@@ -12,6 +12,7 @@ import * as fs from 'fs';
       useFactory: (configService: ConfigService) => {
         const isProduction = configService.get('NODE_ENV') === 'production';
         const certificatePath = path.join(process.cwd(), 'ca.pem');
+        const loadCA = configService.get<string>('LOAD_CA') === 'true';
 
         return {
           type: 'postgres',
@@ -20,10 +21,12 @@ import * as fs from 'fs';
           migrations: [__dirname + '/../../migrations/*{.ts,.js}'],
           synchronize: !isProduction,
           logging: !isProduction,
-          ssl: {
-            rejectUnauthorized: true,
-            ca: fs.readFileSync(certificatePath).toString(),
-          },
+          ssl: loadCA
+            ? {
+                rejectUnauthorized: true,
+                ca: fs.readFileSync(certificatePath).toString(),
+              }
+            : false,
         };
       },
     }),

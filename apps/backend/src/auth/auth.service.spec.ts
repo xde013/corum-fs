@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -22,6 +24,7 @@ import * as bcrypt from 'bcrypt';
 describe('AuthService', () => {
   let service: AuthService;
   let usersService: UsersService;
+  let userRepository: Repository<User>;
   let jwtService: JwtService;
 
   const mockUser: User = {
@@ -37,14 +40,22 @@ describe('AuthService', () => {
   };
 
   beforeEach(async () => {
+    const mockRepository = {
+      create: jest.fn(),
+      save: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         {
+          provide: getRepositoryToken(User),
+          useValue: mockRepository,
+        },
+        {
           provide: UsersService,
           useValue: {
             findByEmail: jest.fn(),
-            create: jest.fn(),
             findByResetToken: jest.fn(),
             updatePasswordResetToken: jest.fn(),
             update: jest.fn(),
@@ -77,6 +88,7 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     usersService = module.get<UsersService>(UsersService);
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     jwtService = module.get<JwtService>(JwtService);
   });
 
@@ -95,7 +107,8 @@ describe('AuthService', () => {
 
     it('should successfully register a new user', async () => {
       jest.spyOn(usersService, 'findByEmail').mockResolvedValue(null);
-      jest.spyOn(usersService, 'create').mockResolvedValue(mockUser);
+      jest.spyOn(userRepository, 'create').mockReturnValue(mockUser);
+      jest.spyOn(userRepository, 'save').mockResolvedValue(mockUser);
       jest
         .spyOn(jwtService, 'signAsync')
         .mockResolvedValueOnce('access-token')
@@ -104,7 +117,8 @@ describe('AuthService', () => {
       const result = await service.register(registerDto);
 
       expect(usersService.findByEmail).toHaveBeenCalledWith(registerDto.email);
-      expect(usersService.create).toHaveBeenCalled();
+      expect(userRepository.create).toHaveBeenCalled();
+      expect(userRepository.save).toHaveBeenCalled();
       expect(result).toHaveProperty('user');
       expect(result).toHaveProperty('accessToken', 'access-token');
       expect(result).toHaveProperty('refreshToken', 'refresh-token');
@@ -112,7 +126,8 @@ describe('AuthService', () => {
 
     it('should hash password before creating user', async () => {
       jest.spyOn(usersService, 'findByEmail').mockResolvedValue(null);
-      jest.spyOn(usersService, 'create').mockResolvedValue(mockUser);
+      jest.spyOn(userRepository, 'create').mockReturnValue(mockUser);
+      jest.spyOn(userRepository, 'save').mockResolvedValue(mockUser);
       jest.spyOn(jwtService, 'signAsync').mockResolvedValue('token');
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashedpassword');
 

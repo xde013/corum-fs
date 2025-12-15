@@ -20,6 +20,9 @@ class EnvironmentVariables {
   @IsOptional()
   NODE_ENV: Environment = Environment.Development;
 
+  @IsString()
+  LOAD_CA: string;
+
   @IsNumber()
   @IsOptional()
   PORT: number = 3000;

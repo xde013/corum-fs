@@ -5,6 +5,9 @@ import { User } from './entities/user.entity';
 import { SortField, SortOrder } from './dto/cursor-pagination.dto';
 import { UserListQueryDto } from './dto/user-list-query.dto';
 import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateSelfDto } from './dto/update-self.dto';
+import { BulkDeleteUsersDto } from './dto/bulk-delete-users.dto';
 import { Role } from './enums/role.enum';
 import { NotFoundException } from '@nestjs/common';
 
@@ -471,25 +474,6 @@ describe('UsersController', () => {
     });
   });
 
-  describe('create', () => {
-    it('should call UsersService.create with DTO and return created user', async () => {
-      const createUserDto = {
-        firstName: 'Charlie',
-        lastName: 'Clark',
-        email: 'charlie@example.com',
-        password: 'Password123!',
-        birthdate: '1992-03-03',
-      };
-      const createdUser = { ...mockUsers[0], ...createUserDto };
-      (service.create as jest.Mock).mockResolvedValue(createdUser);
-
-      const result = await controller.create(createUserDto as any);
-
-      expect(service.create).toHaveBeenCalledWith(createUserDto);
-      expect(result).toEqual(createdUser);
-    });
-  });
-
   describe('findOne', () => {
     it('should return user when found', async () => {
       (service.findOne as jest.Mock).mockResolvedValue(mockUsers[0]);
@@ -511,37 +495,34 @@ describe('UsersController', () => {
 
   describe('update', () => {
     it('should return updated user when service returns a user', async () => {
-      const updateUserDto = { firstName: 'Updated' };
+      const updateUserDto: UpdateUserDto = { firstName: 'Updated' };
       const updatedUser = { ...mockUsers[0], ...updateUserDto };
       (service.update as jest.Mock).mockResolvedValue(updatedUser);
 
-      const result = await controller.update('1', updateUserDto as any);
+      const result = await controller.update('1', updateUserDto);
 
       expect(service.update).toHaveBeenCalledWith('1', updateUserDto);
       expect(result).toEqual(updatedUser);
     });
 
     it('should throw NotFoundException when service returns null', async () => {
-      const updateUserDto = { firstName: 'Updated' };
+      const updateUserDto: UpdateUserDto = { firstName: 'Updated' };
       (service.update as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        controller.update('missing', updateUserDto as any)
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.update('missing', updateUserDto)).rejects.toThrow(
+        NotFoundException
+      );
     });
   });
 
   describe('updateMe', () => {
     it('should call update with current user id and dto', async () => {
       const currentUser = mockUsers[0];
-      const updateSelfDto = { firstName: 'SelfUpdated' };
+      const updateSelfDto: UpdateSelfDto = { firstName: 'SelfUpdated' };
       const updatedUser = { ...currentUser, ...updateSelfDto };
       (service.update as jest.Mock).mockResolvedValue(updatedUser);
 
-      const result = await controller.updateMe(
-        currentUser,
-        updateSelfDto as any
-      );
+      const result = await controller.updateMe(currentUser, updateSelfDto);
 
       expect(service.update).toHaveBeenCalledWith(
         currentUser.id,
@@ -598,8 +579,8 @@ describe('UsersController', () => {
         failed: ['3'],
       });
 
-      const dto = { ids: ['1', '2', '3'] };
-      const result = await controller.bulkRemove(dto as any);
+      const dto: BulkDeleteUsersDto = { ids: ['1', '2', '3'] };
+      const result = await controller.bulkRemove(dto);
 
       expect(service.bulkRemove).toHaveBeenCalledWith(dto.ids);
       expect(result).toEqual({

@@ -19,8 +19,21 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed:admin": "ts-node -r tsconfig-paths/register src/database/seed-admin.ts",
+    "seed": "ts-node -r tsconfig-paths/register src/database/seed.ts",
     "dev": "nest start --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "docker:up": "docker compose up -d",
+    "docker:up:build": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:down:volumes": "docker compose down -v",
+    "docker:logs": "docker compose logs -f",
+    "docker:logs:backend": "docker compose logs -f backend",
+    "docker:logs:db": "docker compose logs -f db",
+    "docker:restart": "docker compose restart",
+    "docker:restart:backend": "docker compose restart backend",
+    "docker:ps": "docker compose ps",
+    "docker:exec:backend": "docker compose exec backend sh",
+    "docker:exec:db": "docker compose exec db psql -U corum -d corum"
   },
   "dependencies": {
     "@fastify/helmet": "^13.0.2",

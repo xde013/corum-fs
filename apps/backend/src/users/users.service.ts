@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateSelfDto } from './dto/update-self.dto';
 import { CursorPaginatedResponseDto } from './dto/cursor-paginated-response.dto';
@@ -16,15 +15,6 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>
   ) {}
-
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.userRepository.create({
-      ...createUserDto,
-      birthdate: new Date(createUserDto.birthdate),
-      role: createUserDto.role || Role.USER,
-    });
-    return await this.userRepository.save(user);
-  }
 
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();

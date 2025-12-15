@@ -488,56 +488,6 @@ describe('UsersService', () => {
     });
   });
 
-  describe('create', () => {
-    it('should create a user with default USER role', async () => {
-      const createUserDto = {
-        firstName: 'Test',
-        lastName: 'User',
-        email: 'test@example.com',
-        password: 'password123',
-        birthdate: '1990-01-01',
-      };
-
-      const savedUser = {
-        ...mockUsers[0],
-        ...createUserDto,
-        role: Role.USER,
-      };
-      mockRepository.create.mockReturnValue(savedUser);
-      mockRepository.save.mockResolvedValue(savedUser);
-
-      const result = await service.create(createUserDto);
-
-      expect(mockRepository.create).toHaveBeenCalled();
-      expect(mockRepository.save).toHaveBeenCalled();
-      expect(result).toEqual(savedUser);
-      expect(result.role).toBe(Role.USER);
-    });
-
-    it('should create a user with specified role', async () => {
-      const createUserDto = {
-        firstName: 'Admin',
-        lastName: 'User',
-        email: 'admin@example.com',
-        password: 'password123',
-        birthdate: '1990-01-01',
-        role: Role.ADMIN,
-      };
-
-      const savedUser = {
-        ...mockUsers[0],
-        ...createUserDto,
-        role: Role.ADMIN,
-      };
-      mockRepository.create.mockReturnValue(savedUser);
-      mockRepository.save.mockResolvedValue(savedUser);
-
-      const result = await service.create(createUserDto);
-
-      expect(result.role).toBe(Role.ADMIN);
-    });
-  });
-
   describe('update', () => {
     it('should update a user and return the updated user', async () => {
       const updateUserDto = {
