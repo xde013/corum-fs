@@ -1,7 +1,6 @@
 import { render, screen, waitFor } from '@/shared/utils/testUtils';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { act } from '@testing-library/react';
 import { ForgotPasswordForm } from './ForgotPasswordForm';
 
 // Mock authService
@@ -93,10 +92,7 @@ describe('ForgotPasswordForm', () => {
     const submitButton = screen.getByRole('button', { name: 'Send Reset Link' });
 
     await user.type(emailInput, '  user@example.com  ');
-    
-    await act(async () => {
-      await user.click(submitButton);
-    });
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(mockSubmit).toHaveBeenCalledWith('user@example.com');
@@ -153,10 +149,7 @@ describe('ForgotPasswordForm', () => {
 
     await user.clear(emailInput);
     await user.type(emailInput, 'user@example.com');
-    
-    await act(async () => {
-      await user.click(submitButton);
-    });
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(
@@ -183,10 +176,7 @@ describe('ForgotPasswordForm', () => {
 
     await user.clear(emailInput);
     await user.type(emailInput, 'user@example.com');
-    
-    await act(async () => {
-      await user.click(submitButton);
-    });
+    await user.click(submitButton);
 
     await waitFor(() => {
       const resetLink = screen.getByText(/http:\/\/localhost:3000\/auth\/reset-password\?token=user@example.com/i);
@@ -210,10 +200,7 @@ describe('ForgotPasswordForm', () => {
 
     await user.clear(emailInput);
     await user.type(emailInput, 'user@example.com');
-    
-    await act(async () => {
-      await user.click(submitButton);
-    });
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(

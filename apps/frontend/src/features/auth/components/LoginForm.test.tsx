@@ -1,7 +1,6 @@
 import { render, screen, waitFor } from '@/shared/utils/testUtils';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { act } from '@testing-library/react';
 import { LoginForm } from './LoginForm';
 
 // Mock useAuth
@@ -75,10 +74,7 @@ describe('LoginForm', () => {
 
     await user.type(emailInput, '  user@example.com  ');
     await user.type(passwordInput, 'password123');
-    
-    await act(async () => {
-      await user.click(submitButton);
-    });
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(mockSubmit).toHaveBeenCalledWith('user@example.com', 'password123');
@@ -156,15 +152,14 @@ describe('LoginForm', () => {
 
     await user.type(emailInput, 'user@example.com');
     await user.type(passwordInput, 'password123');
-    
-    await act(async () => {
-      await user.click(submitButton);
-    });
+    await user.click(submitButton);
 
     // Verify the operation function calls login
     if (capturedOperation) {
-      await capturedOperation('user@example.com', 'password123');
-      expect(mockLogin).toHaveBeenCalledWith('user@example.com', 'password123');
+      await waitFor(async () => {
+        await capturedOperation('user@example.com', 'password123');
+        expect(mockLogin).toHaveBeenCalledWith('user@example.com', 'password123');
+      });
     }
   });
 });
