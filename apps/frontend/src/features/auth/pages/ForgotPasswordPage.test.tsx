@@ -1,6 +1,7 @@
 import { render, screen } from '@/shared/utils/testUtils';
 import { describe, it, expect, vi } from 'vitest';
 import { ForgotPasswordPage } from './ForgotPasswordPage';
+import React from 'react';
 
 // Mock AuthLayout
 vi.mock('@/shared/components/layout/AuthLayout', () => ({
