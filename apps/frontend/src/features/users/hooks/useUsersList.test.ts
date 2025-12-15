@@ -4,7 +4,7 @@ import { useUsersList } from './useUsersList';
 import type { User, CursorPaginatedResponse } from '@/shared/types';
 
 // Mock userService
-vi.mock('@/features/users/services/userService', () => ({
+vi.mock('@/shared/services/api/userService', () => ({
   userService: {
     getUsers: vi.fn(),
   },
@@ -14,6 +14,9 @@ vi.mock('@/features/users/services/userService', () => ({
 vi.mock('@/shared/utils/errorHandler', () => ({
   handleApiError: vi.fn(),
 }));
+
+import { userService } from '@/shared/services/api/userService';
+import { handleApiError } from '@/shared/utils/errorHandler';
 
 describe('useUsersList', () => {
   const mockUsers: User[] = [
@@ -49,9 +52,8 @@ describe('useUsersList', () => {
     },
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
-    const { userService } = await import('@/features/users/services/userService');
     vi.mocked(userService.getUsers).mockResolvedValue(mockResponse);
   });
 
@@ -88,9 +90,8 @@ describe('useUsersList', () => {
   it('should fetch users automatically when autoFetch is true', async () => {
     renderHook(() => useUsersList({ autoFetch: true }));
 
-    await waitFor(async () => {
-      const { userService } = await import('@/features/users/services/userService');
-      expect(userService.getUsers).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(vi.mocked(userService.getUsers)).toHaveBeenCalled();
     });
   });
 
@@ -98,16 +99,14 @@ describe('useUsersList', () => {
     renderHook(() => useUsersList({ autoFetch: false }));
 
     // Wait a bit to ensure no fetch happens
-    await new Promise(resolve => setTimeout(resolve, 100));
-    const { userService } = await import('@/features/users/services/userService');
-    expect(userService.getUsers).not.toHaveBeenCalled();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(vi.mocked(userService.getUsers)).not.toHaveBeenCalled();
   });
 
   it('should fetch users with correct query parameters', async () => {
     renderHook(() => useUsersList({ autoFetch: true }));
 
-    await waitFor(async () => {
-      const { userService } = await import('@/features/users/services/userService');
+    await waitFor(() => {
       expect(userService.getUsers).toHaveBeenCalledWith(
         expect.objectContaining({
           sortBy: 'createdAt',
@@ -147,12 +146,10 @@ describe('useUsersList', () => {
   it('should handle filter changes', async () => {
     const { result } = renderHook(() => useUsersList({ autoFetch: true }));
 
-    await waitFor(async () => {
-      const { userService } = await import('@/features/users/services/userService');
+    await waitFor(() => {
       expect(userService.getUsers).toHaveBeenCalled();
     });
 
-    const { userService } = await import('@/features/users/services/userService');
     vi.clearAllMocks();
 
     await act(async () => {
@@ -171,12 +168,10 @@ describe('useUsersList', () => {
   it('should handle sort changes', async () => {
     const { result } = renderHook(() => useUsersList({ autoFetch: true }));
 
-    await waitFor(async () => {
-      const { userService } = await import('@/features/users/services/userService');
+    await waitFor(() => {
       expect(userService.getUsers).toHaveBeenCalled();
     });
 
-    const { userService } = await import('@/features/users/services/userService');
     vi.clearAllMocks();
 
     await act(async () => {
@@ -208,8 +203,7 @@ describe('useUsersList', () => {
       result.current.handleLoadMore();
     });
 
-    await waitFor(async () => {
-      const { userService } = await import('@/features/users/services/userService');
+    await waitFor(() => {
       expect(userService.getUsers).toHaveBeenCalledWith(
         expect.objectContaining({
           cursor: 'cursor-123',
@@ -238,7 +232,6 @@ describe('useUsersList', () => {
       },
     ];
 
-    const { userService } = await import('@/features/users/services/userService');
     vi.mocked(userService.getUsers).mockResolvedValueOnce({
       data: moreUsers,
       meta: {
@@ -260,7 +253,6 @@ describe('useUsersList', () => {
   });
 
   it('should not load more when hasMore is false', async () => {
-    const { userService } = await import('@/features/users/services/userService');
     vi.mocked(userService.getUsers).mockResolvedValueOnce({
       data: mockUsers,
       meta: {
@@ -284,7 +276,7 @@ describe('useUsersList', () => {
     });
 
     // Should not call getUsers again when hasMore is false
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     expect(userService.getUsers).not.toHaveBeenCalled();
   });
 
@@ -323,8 +315,7 @@ describe('useUsersList', () => {
       result.current.refresh();
     });
 
-    await waitFor(async () => {
-      const { userService } = await import('@/features/users/services/userService');
+    await waitFor(() => {
       expect(userService.getUsers).toHaveBeenCalledWith(
         expect.objectContaining({
           cursor: undefined,
@@ -353,7 +344,6 @@ describe('useUsersList', () => {
       },
     ];
 
-    const { userService } = await import('@/features/users/services/userService');
     vi.mocked(userService.getUsers).mockResolvedValueOnce({
       data: newUsers,
       meta: {
@@ -375,8 +365,6 @@ describe('useUsersList', () => {
   });
 
   it('should handle errors gracefully', async () => {
-    const { handleApiError } = await import('@/shared/utils/errorHandler');
-    const { userService } = await import('@/features/users/services/userService');
     const error = new Error('Failed to fetch');
     vi.mocked(userService.getUsers).mockRejectedValueOnce(error);
 
@@ -396,8 +384,7 @@ describe('useUsersList', () => {
   it('should reset cursor when filters change', async () => {
     const { result } = renderHook(() => useUsersList({ autoFetch: true }));
 
-    await waitFor(async () => {
-      const { userService } = await import('@/features/users/services/userService');
+    await waitFor(() => {
       expect(userService.getUsers).toHaveBeenCalled();
     });
 
@@ -405,8 +392,7 @@ describe('useUsersList', () => {
       result.current.handleFilterChange({ search: 'test' });
     });
 
-    await waitFor(async () => {
-      const { userService } = await import('@/features/users/services/userService');
+    await waitFor(() => {
       expect(userService.getUsers).toHaveBeenCalledWith(
         expect.objectContaining({
           cursor: undefined,
@@ -418,8 +404,7 @@ describe('useUsersList', () => {
   it('should reset cursor when sort changes', async () => {
     const { result } = renderHook(() => useUsersList({ autoFetch: true }));
 
-    await waitFor(async () => {
-      const { userService } = await import('@/features/users/services/userService');
+    await waitFor(() => {
       expect(userService.getUsers).toHaveBeenCalled();
     });
 
@@ -427,8 +412,7 @@ describe('useUsersList', () => {
       result.current.handleSortChange('email', 'ASC');
     });
 
-    await waitFor(async () => {
-      const { userService } = await import('@/features/users/services/userService');
+    await waitFor(() => {
       expect(userService.getUsers).toHaveBeenCalledWith(
         expect.objectContaining({
           cursor: undefined,

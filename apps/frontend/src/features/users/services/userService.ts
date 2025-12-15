@@ -23,7 +23,7 @@ export const userService = {
 
   async getCurrentUser(): Promise<User> {
     const client = apiClient.getClient();
-    const response = await client.get<User>('/users/me');
+    const response = await client.get<User>('/auth/me');
     return response.data;
   },
 

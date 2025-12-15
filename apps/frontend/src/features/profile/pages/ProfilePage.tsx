@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { userService } from '@/features/users/services/userService';
+import { userService } from '@/shared/services/api/userService';
 import { ProfileForm } from '@/features/profile/components/ProfileForm';
 import type { ProfileFormData } from '@/shared/utils/validation';
 import { FiUser, FiLock, FiMail, FiLogOut, FiEdit2 } from 'react-icons/fi';

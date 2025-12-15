@@ -152,7 +152,7 @@ describe('userService', () => {
 
       const result = await userService.getCurrentUser();
 
-      expect(mocks.get).toHaveBeenCalledWith('/users/me');
+      expect(mocks.get).toHaveBeenCalledWith('/auth/me');
       expect(result).toEqual(mockUser);
     });
 
@@ -161,7 +161,7 @@ describe('userService', () => {
       mocks.get.mockRejectedValue(error);
 
       await expect(userService.getCurrentUser()).rejects.toThrow('Failed to fetch current user');
-      expect(mocks.get).toHaveBeenCalledWith('/users/me');
+      expect(mocks.get).toHaveBeenCalledWith('/auth/me');
     });
   });
 

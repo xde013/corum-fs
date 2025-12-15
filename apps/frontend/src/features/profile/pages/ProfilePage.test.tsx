@@ -31,7 +31,7 @@ vi.mock('@/features/auth/hooks/useAuth', () => ({
 }));
 
 // Mock userService
-vi.mock('@/features/users/services/userService', () => ({
+vi.mock('@/shared/services/api/userService', () => ({
   userService: {
     updateProfile: vi.fn(),
   },
@@ -108,7 +108,7 @@ describe('ProfilePage', () => {
       submit: mockSubmit,
       isLoading: false,
     });
-    const { userService } = await import('@/features/users/services/userService');
+    const { userService } = await import('@/shared/services/api/userService');
     vi.mocked(userService.updateProfile).mockResolvedValue(undefined);
     mockRefreshUser.mockResolvedValue(undefined);
     mockLogout.mockResolvedValue(undefined);

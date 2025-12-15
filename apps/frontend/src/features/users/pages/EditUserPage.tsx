@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EditUserForm } from '@/features/users/components/EditUserForm';
 import { DeleteUserModal } from '@/features/users/components/DeleteUserModal';
-import { userService } from '@/features/users/services/userService';
+import { userService } from '@/shared/services/api/userService';
 import type { UpdateUserFormData } from '@/shared/utils/validation';
 import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { Button } from '@/shared/components/ui/Button';

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { userService } from '@/features/users/services/userService';
+import { userService } from '@/shared/services/api/userService';
 import type { User, UserListQuery, SortField, SortOrder } from '@/shared/types';
 import { useAsyncOperation } from '@/shared/hooks/useAsyncOperation';
 import { handleApiError } from '@/shared/utils/errorHandler';

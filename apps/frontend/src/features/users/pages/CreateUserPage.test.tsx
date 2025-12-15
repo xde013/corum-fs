@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CreateUserPage } from './CreateUserPage';
 
 // Mock userService
-vi.mock('@/features/users/services/userService', () => ({
+vi.mock('@/shared/services/api/userService', () => ({
   userService: {
     createUser: vi.fn(),
   },
@@ -94,7 +94,7 @@ describe('CreateUserPage', () => {
   it('should call createUser with correct data when form is submitted', async () => {
     const user = (await import('@testing-library/user-event')).default;
     const userEvent = user.setup();
-    const { userService } = await import('@/features/users/services/userService');
+    const { userService } = await import('@/shared/services/api/userService');
     
     render(<CreateUserPage />);
 

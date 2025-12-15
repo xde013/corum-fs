@@ -5,7 +5,7 @@ import { UsersTable } from './UsersTable';
 import { UserFilters } from './UserFilters';
 import { UserPagination } from './UserPagination';
 import { DeleteUserModal } from './DeleteUserModal';
-import { userService } from '@/features/users/services/userService';
+import { userService } from '@/shared/services/api/userService';
 import toast from 'react-hot-toast';
 import { FiPlus, FiTrash2 } from 'react-icons/fi';
 import type { User } from '@/shared/types';

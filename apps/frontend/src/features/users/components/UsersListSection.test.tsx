@@ -5,24 +5,26 @@ import { UsersListSection } from './UsersListSection';
 import type { UseUsersListReturn } from '@/features/users/hooks/useUsersList';
 import type { User } from '@/shared/types';
 
-// Mocks
-const mockBulkDeleteUsers = vi.fn();
-const mockDeleteUser = vi.fn();
-const mockToastSuccess = vi.fn();
-const mockToastError = vi.fn();
+// Hoisted mocks (must not depend on later top-level bindings)
+const mocks = vi.hoisted(() => ({
+  bulkDeleteUsers: vi.fn(),
+  deleteUser: vi.fn(),
+  toastSuccess: vi.fn(),
+  toastError: vi.fn(),
+}));
 
-vi.mock('@/features/users/services/userService', () => ({
+vi.mock('@/shared/services/api/userService', () => ({
   userService: {
-    bulkDeleteUsers: (...args: any[]) => mockBulkDeleteUsers(...args),
-    deleteUser: (...args: any[]) => mockDeleteUser(...args),
+    bulkDeleteUsers: mocks.bulkDeleteUsers,
+    deleteUser: mocks.deleteUser,
   },
 }));
 
 vi.mock('react-hot-toast', () => ({
   __esModule: true,
   default: {
-    success: (...args: any[]) => mockToastSuccess(...args),
-    error: (...args: any[]) => mockToastError(...args),
+    success: (...args: any[]) => mocks.toastSuccess(...args),
+    error: (...args: any[]) => mocks.toastError(...args),
   },
 }));
 
@@ -115,7 +117,7 @@ describe('UsersListSection', () => {
   it('should perform bulk delete for selected users', async () => {
     const user = userEvent.setup();
     const usersList = createMockUsersList();
-    mockBulkDeleteUsers.mockResolvedValue({
+    mocks.bulkDeleteUsers.mockResolvedValue({
       deleted: 1,
       failed: [],
       message: 'Successfully deleted 1 user(s)',
@@ -156,8 +158,8 @@ describe('UsersListSection', () => {
     const confirmButton = screen.getByText('Confirm Delete');
     await user.click(confirmButton);
 
-    expect(mockBulkDeleteUsers).toHaveBeenCalledWith(['1']);
-    expect(mockDeleteUser).not.toHaveBeenCalled();
+    expect(mocks.bulkDeleteUsers).toHaveBeenCalledWith(['1']);
+    expect(mocks.deleteUser).not.toHaveBeenCalled();
     expect(usersList.refresh).toHaveBeenCalled();
 
     // After successful bulk delete, selection should be cleared
@@ -169,7 +171,7 @@ describe('UsersListSection', () => {
   it('should perform single delete when deleting one user from table', async () => {
     const user = userEvent.setup();
     const usersList = createMockUsersList();
-    mockDeleteUser.mockResolvedValue(undefined);
+    mocks.deleteUser.mockResolvedValue(undefined);
 
     render(
       <UsersListSection
@@ -190,8 +192,8 @@ describe('UsersListSection', () => {
     const confirmButton = screen.getByText('Confirm Delete');
     await user.click(confirmButton);
 
-    expect(mockDeleteUser).toHaveBeenCalledWith('1');
-    expect(mockBulkDeleteUsers).not.toHaveBeenCalled();
+    expect(mocks.deleteUser).toHaveBeenCalledWith('1');
+    expect(mocks.bulkDeleteUsers).not.toHaveBeenCalled();
     expect(usersList.refresh).toHaveBeenCalled();
   });
 });

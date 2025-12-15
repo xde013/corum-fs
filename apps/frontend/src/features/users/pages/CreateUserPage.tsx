@@ -1,5 +1,5 @@
 import { CreateUserForm } from '@/features/users/components/CreateUserForm';
-import { userService } from '@/features/users/services/userService';
+import { userService } from '@/shared/services/api/userService';
 import type { CreateUserFormData } from '@/shared/utils/validation';
 import { PageLayout } from '@/shared/components/layout/PageLayout';
 import { useFormSubmission } from '@/shared/hooks/useFormSubmission';
