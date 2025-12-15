@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@/shared/utils/testUtils';
+import { render, screen, waitFor, act } from '@/shared/utils/testUtils';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { EditUserPage } from './EditUserPage';
@@ -131,12 +131,16 @@ describe('EditUserPage', () => {
 
   it('should render loading spinner while fetching user', async () => {
     const { useAsyncOperation } = await import('@/shared/hooks/useAsyncOperation');
+    // Create a promise that never resolves to keep loading state
+    const neverResolvingPromise = new Promise(() => {});
     vi.mocked(useAsyncOperation).mockReturnValueOnce({
-      execute: vi.fn(),
+      execute: vi.fn().mockReturnValue(neverResolvingPromise),
       isLoading: true,
     });
 
-    render(<EditUserPage />);
+    await act(async () => {
+      render(<EditUserPage />);
+    });
 
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
