@@ -20,12 +20,13 @@ class EnvironmentVariables {
   @IsOptional()
   NODE_ENV: Environment = Environment.Development;
 
+  @IsOptional()
   @IsString()
-  LOAD_CA: string;
+  LOAD_CA: string = 'false';
 
   @IsNumber()
   @IsOptional()
-  PORT: number = 3000;
+  PORT: number;
 
   @IsString()
   DATABASE_URL: string;
