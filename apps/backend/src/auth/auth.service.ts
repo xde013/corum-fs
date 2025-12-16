@@ -139,12 +139,12 @@ export class AuthService {
 
     const accessTokenOptions: JwtSignOptions = {
       secret: jwtSecret,
-      expiresIn: accessTokenExpiration as string,
+      expiresIn: accessTokenExpiration,
     } as JwtSignOptions;
 
     const refreshTokenOptions: JwtSignOptions = {
       secret: jwtRefreshSecret,
-      expiresIn: refreshTokenExpiration as string,
+      expiresIn: refreshTokenExpiration,
     } as JwtSignOptions;
 
     const [accessToken, refreshToken] = await Promise.all([

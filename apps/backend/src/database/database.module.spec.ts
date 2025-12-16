@@ -14,4 +14,3 @@ describe('DatabaseModule', () => {
     expect(instance).toBeInstanceOf(DatabaseModule);
   });
 });
-

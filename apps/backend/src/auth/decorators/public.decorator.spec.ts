@@ -18,6 +18,7 @@ describe('Public Decorator', () => {
   it('should be usable as a decorator', () => {
     // Verify decorator can be applied without errors
     expect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class TestClass {
         @Public()
         testMethod() {}
@@ -25,4 +26,3 @@ describe('Public Decorator', () => {
     }).not.toThrow();
   });
 });
-

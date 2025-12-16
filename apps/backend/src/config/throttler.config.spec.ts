@@ -21,7 +21,9 @@ describe('ThrottlerConfig', () => {
 
   describe('getThrottlerConfig', () => {
     it('should return array of throttle configurations', () => {
-      jest.spyOn(configService, 'get').mockImplementation((key: string, defaultValue?: any) => defaultValue);
+      jest
+        .spyOn(configService, 'get')
+        .mockImplementation((key: string, defaultValue?: any) => defaultValue);
 
       const result = getThrottlerConfig(configService);
 
@@ -30,7 +32,9 @@ describe('ThrottlerConfig', () => {
     });
 
     it('should return short throttle config with default values', () => {
-      jest.spyOn(configService, 'get').mockImplementation((key: string, defaultValue?: any) => defaultValue);
+      jest
+        .spyOn(configService, 'get')
+        .mockImplementation((key: string, defaultValue?: any) => defaultValue);
 
       const result = getThrottlerConfig(configService);
 
@@ -42,7 +46,9 @@ describe('ThrottlerConfig', () => {
     });
 
     it('should return medium throttle config with default values', () => {
-      jest.spyOn(configService, 'get').mockImplementation((key: string, defaultValue?: any) => defaultValue);
+      jest
+        .spyOn(configService, 'get')
+        .mockImplementation((key: string, defaultValue?: any) => defaultValue);
 
       const result = getThrottlerConfig(configService);
 
@@ -54,7 +60,9 @@ describe('ThrottlerConfig', () => {
     });
 
     it('should return long throttle config with default values', () => {
-      jest.spyOn(configService, 'get').mockImplementation((key: string, defaultValue?: any) => defaultValue);
+      jest
+        .spyOn(configService, 'get')
+        .mockImplementation((key: string, defaultValue?: any) => defaultValue);
 
       const result = getThrottlerConfig(configService);
 
@@ -104,10 +112,18 @@ describe('ThrottlerConfig', () => {
       getThrottlerConfig(configService);
 
       expect(configService.get).toHaveBeenCalledTimes(3);
-      expect(configService.get).toHaveBeenCalledWith(ENV_KEYS.THROTTLE_SHORT_LIMIT, 10);
-      expect(configService.get).toHaveBeenCalledWith(ENV_KEYS.THROTTLE_MEDIUM_LIMIT, 20);
-      expect(configService.get).toHaveBeenCalledWith(ENV_KEYS.THROTTLE_LONG_LIMIT, 100);
+      expect(configService.get).toHaveBeenCalledWith(
+        ENV_KEYS.THROTTLE_SHORT_LIMIT,
+        10
+      );
+      expect(configService.get).toHaveBeenCalledWith(
+        ENV_KEYS.THROTTLE_MEDIUM_LIMIT,
+        20
+      );
+      expect(configService.get).toHaveBeenCalledWith(
+        ENV_KEYS.THROTTLE_LONG_LIMIT,
+        100
+      );
     });
   });
 });
-

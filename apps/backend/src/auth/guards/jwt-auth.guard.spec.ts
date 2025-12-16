@@ -33,24 +33,37 @@ describe('JwtAuthGuard', () => {
       const result = guard.canActivate(mockExecutionContext);
 
       expect(result).toBe(true);
-      expect(reflector.getAllAndOverride).toHaveBeenCalledWith(
-        IS_PUBLIC_KEY,
-        [mockExecutionContext.getHandler(), mockExecutionContext.getClass()]
-      );
+      expect(reflector.getAllAndOverride).toHaveBeenCalledWith(IS_PUBLIC_KEY, [
+        mockExecutionContext.getHandler(),
+        mockExecutionContext.getClass(),
+      ]);
     });
 
     it('should call super.canActivate if route is not public', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      const superCanActivateSpy = jest.spyOn(Object.getPrototypeOf(JwtAuthGuard.prototype), 'canActivate').mockReturnValue(true);
+      const superCanActivateSpy = jest
+        .spyOn(Object.getPrototypeOf(JwtAuthGuard.prototype), 'canActivate')
+        .mockReturnValue(true);
 
-      guard.canActivate(mockExecutionContext);
+      const result = guard.canActivate(mockExecutionContext);
 
-      expect(superCanActivateSpy).toHaveBeenCalledWith(mockExecutionContext);
+      // Handle potential promise
+      if (result instanceof Promise) {
+        void result.then(() => {
+          expect(superCanActivateSpy).toHaveBeenCalledWith(
+            mockExecutionContext
+          );
+        });
+      } else {
+        expect(superCanActivateSpy).toHaveBeenCalledWith(mockExecutionContext);
+      }
     });
 
     it('should return false if route is not public and super.canActivate returns false', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(Object.getPrototypeOf(JwtAuthGuard.prototype), 'canActivate').mockReturnValue(false);
+      jest
+        .spyOn(Object.getPrototypeOf(JwtAuthGuard.prototype), 'canActivate')
+        .mockReturnValue(false);
 
       const result = guard.canActivate(mockExecutionContext);
 
@@ -58,4 +71,3 @@ describe('JwtAuthGuard', () => {
     });
   });
 });
-

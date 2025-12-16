@@ -10,9 +10,6 @@ import {
 describe('HealthController', () => {
   let controller: HealthController;
   let healthCheckService: HealthCheckService;
-  let typeOrmHealthIndicator: TypeOrmHealthIndicator;
-  let memoryHealthIndicator: MemoryHealthIndicator;
-  let diskHealthIndicator: DiskHealthIndicator;
 
   const mockHealthCheckResult = {
     status: 'ok',
@@ -63,15 +60,6 @@ describe('HealthController', () => {
 
     controller = module.get<HealthController>(HealthController);
     healthCheckService = module.get<HealthCheckService>(HealthCheckService);
-    typeOrmHealthIndicator = module.get<TypeOrmHealthIndicator>(
-      TypeOrmHealthIndicator
-    );
-    memoryHealthIndicator = module.get<MemoryHealthIndicator>(
-      MemoryHealthIndicator
-    );
-    diskHealthIndicator = module.get<DiskHealthIndicator>(
-      DiskHealthIndicator
-    );
   });
 
   it('should be defined', () => {
@@ -298,4 +286,3 @@ describe('HealthController', () => {
     });
   });
 });
-

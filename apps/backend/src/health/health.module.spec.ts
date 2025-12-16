@@ -24,4 +24,3 @@ describe('HealthModule', () => {
     expect(module).toBeInstanceOf(TestingModule);
   });
 });
-

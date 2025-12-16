@@ -26,7 +26,8 @@ describe('AuthModule', () => {
           load: [
             () => ({
               JWT_SECRET: 'test-jwt-secret-minimum-32-characters-long',
-              JWT_REFRESH_SECRET: 'test-refresh-secret-minimum-32-characters-long',
+              JWT_REFRESH_SECRET:
+                'test-refresh-secret-minimum-32-characters-long',
             }),
           ],
         }),
@@ -67,4 +68,3 @@ describe('AuthModule', () => {
     expect(service).toBeDefined();
   });
 });
-

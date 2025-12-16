@@ -32,7 +32,9 @@ describe('JwtStrategy', () => {
 
   beforeEach(() => {
     configService = {
-      get: jest.fn().mockReturnValue('test-jwt-secret-minimum-32-characters-long'),
+      get: jest
+        .fn()
+        .mockReturnValue('test-jwt-secret-minimum-32-characters-long'),
     } as unknown as ConfigService;
 
     usersService = {
@@ -86,4 +88,3 @@ describe('JwtStrategy', () => {
     });
   });
 });
-

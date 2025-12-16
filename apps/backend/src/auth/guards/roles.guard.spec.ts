@@ -63,7 +63,9 @@ describe('RolesGuard', () => {
     });
 
     it('should return true if user has one of multiple required roles', () => {
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.USER, Role.ADMIN]);
+      jest
+        .spyOn(reflector, 'getAllAndOverride')
+        .mockReturnValue([Role.USER, Role.ADMIN]);
 
       const result = guard.canActivate(mockExecutionContext);
 
@@ -101,11 +103,10 @@ describe('RolesGuard', () => {
 
       guard.canActivate(mockExecutionContext);
 
-      expect(reflector.getAllAndOverride).toHaveBeenCalledWith(
-        ROLES_KEY,
-        [mockExecutionContext.getHandler(), mockExecutionContext.getClass()]
-      );
+      expect(reflector.getAllAndOverride).toHaveBeenCalledWith(ROLES_KEY, [
+        mockExecutionContext.getHandler(),
+        mockExecutionContext.getClass(),
+      ]);
     });
   });
 });
-

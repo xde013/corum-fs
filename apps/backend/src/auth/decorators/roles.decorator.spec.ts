@@ -23,6 +23,7 @@ describe('Roles Decorator', () => {
 
   it('should be usable as a decorator with single role', () => {
     expect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class TestClass {
         @Roles(Role.ADMIN)
         testMethod() {}
@@ -32,6 +33,7 @@ describe('Roles Decorator', () => {
 
   it('should be usable as a decorator with multiple roles', () => {
     expect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class TestClass {
         @Roles(Role.ADMIN, Role.USER)
         testMethod() {}
@@ -39,4 +41,3 @@ describe('Roles Decorator', () => {
     }).not.toThrow();
   });
 });
-
